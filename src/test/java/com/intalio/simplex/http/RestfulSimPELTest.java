@@ -463,7 +463,7 @@ public class RestfulSimPELTest extends TestCase {
 
             "process RequestError {\n" +
             "   receive(self) { |query|\n" +
-            "       reply();\n" +
+            "       foo = 1;\n" +
             "   }\n" +
             "}";
 
