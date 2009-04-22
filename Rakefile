@@ -20,7 +20,7 @@ require "buildr"
 require "buildr/antlr"
 
 # Keep this structure to allow the build system to update version numbers.
-VERSION_NUMBER = "0.1-SNAPSHOT"
+VERSION_NUMBER = "0.1"
 NEXT_VERSION = "0.1"
 
 ANTLR_RT            = "org.antlr:antlr-runtime:jar:3.1.1"
