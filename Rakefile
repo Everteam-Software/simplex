@@ -52,7 +52,7 @@ ODE                 = group("ode-rest-bpel-api", "ode-rest-bpel-compiler", "ode-
                             "ode-rest-scheduler-simple", "ode-rest-utils", :under=>"org.apache.ode", :version=>"0.1")
 OPENJPA             = ["org.apache.openjpa:openjpa:jar:1.1.0",
                        "net.sourceforge.serp:serp:jar:1.13.1"]
-SIMPEL              = "com.intalio.simpel:simpel:jar:0.1"
+SIMPEL              = "com.intalio.simpel:simpel:jar:0.2-SNAPSHOT"
 TRANQL              = ["tranql:tranql-connector:jar:1.1", COMMONS.primitives]
 WSDL4J              = "wsdl4j:wsdl4j:jar:1.6.2"
 XERCES              = "xerces:xercesImpl:jar:2.8.1"

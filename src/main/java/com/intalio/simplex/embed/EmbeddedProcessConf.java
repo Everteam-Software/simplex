@@ -42,6 +42,7 @@ public class EmbeddedProcessConf implements ProcessConf {
     private QName _pid;
     private ProcessModel _oprocess;
     private Descriptor _desc;
+    private URI _baseUri;
 
     public EmbeddedProcessConf(QName pid, ProcessModel oprocess, Descriptor desc) {
         _oprocess = oprocess;
@@ -92,7 +93,11 @@ public class EmbeddedProcessConf implements ProcessConf {
     }
 
     public URI getBaseURI() {
-        throw new UnsupportedOperationException();
+        return _baseUri;
+    }
+
+    public void setBaseURI(URI baseUri) {
+	    _baseUri = baseUri;
     }
 
     public Date getDeployDate() {

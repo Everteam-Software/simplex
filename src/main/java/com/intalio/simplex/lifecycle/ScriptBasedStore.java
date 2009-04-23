@@ -21,6 +21,7 @@ package com.intalio.simplex.lifecycle;
 import com.intalio.simpel.CompilationException;
 import com.intalio.simpel.Descriptor;
 import com.intalio.simplex.embed.EmbeddedStore;
+import com.intalio.simplex.embed.EmbeddedProcessConf;
 import org.apache.log4j.Logger;
 import org.apache.ode.bpel.iapi.ProcessStoreEvent;
 import org.apache.ode.bpel.rapi.ProcessModel;
@@ -124,7 +125,6 @@ public class ScriptBasedStore extends EmbeddedStore {
                         QName pid = toPid(oprocess.getQName(), versionFromCbpName(p.getName()));
                         fireEvent(new ProcessStoreEvent(ProcessStoreEvent.Type.UNDEPLOYED, pid, null));
                         _processes.remove(pid);
-                        _descriptors.remove(pid);
                         p.delete();
                     }
 
@@ -165,8 +165,9 @@ public class ScriptBasedStore extends EmbeddedStore {
             cbpFos.close();
 
             QName pid = toPid(oprocess.getQName(), version);
-            _processes.put(pid, oprocess);
-            _descriptors.put(pid, desc);
+            EmbeddedProcessConf conf = new EmbeddedProcessConf(pid, oprocess, desc);
+            conf.setBaseURI(pfile.toURI());
+            _processes.put(pid, conf);
 
             fireEvent(new ProcessStoreEvent(ProcessStoreEvent.Type.DEPLOYED, pid, null));
             fireEvent(new ProcessStoreEvent(ProcessStoreEvent.Type.ACTIVATED, pid, null));
@@ -189,8 +190,9 @@ public class ScriptBasedStore extends EmbeddedStore {
 
                 QName pid = toPid(pmodel.getQName(), version);
 
-                _processes.put(pid, pmodel);
-                _descriptors.put(pid, desc);
+                EmbeddedProcessConf conf = new EmbeddedProcessConf(pid, pmodel, desc);
+                conf.setBaseURI(pfile.toURI());
+                _processes.put(pid, conf);
 
                 fireEvent(new ProcessStoreEvent(ProcessStoreEvent.Type.ACTIVATED, pid, null));
             } catch (Exception e) {

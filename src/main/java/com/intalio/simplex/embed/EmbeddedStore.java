@@ -28,6 +28,7 @@ import org.w3c.dom.Node;
 import javax.xml.namespace.QName;
 import java.io.File;
 import java.util.*;
+import java.net.URI;
 
 /**
  * TODO In the ProcessStore and the ProcessConf interfaces, some methods are part of the contract
@@ -37,8 +38,8 @@ public class EmbeddedStore implements ProcessStore {
 
     protected SimPELCompiler _compiler = new SimPELCompiler();
     private ArrayList<ProcessStoreListener> _listeners = new ArrayList<ProcessStoreListener>();
-    protected HashMap<QName, ProcessModel> _processes = new HashMap<QName, ProcessModel>();
-    protected HashMap<QName, Descriptor> _descriptors = new HashMap<QName, Descriptor>();
+
+    protected HashMap <QName,ProcessConf> _processes = new HashMap<QName,ProcessConf>();
 
     public Collection<QName> deploy(String processStr, Descriptor desc) {
         OProcess op = null;
@@ -48,8 +49,9 @@ public class EmbeddedStore implements ProcessStore {
             System.err.println("There were errors during the compilation of a SimPEL process:\n" + e.getMessage());
             return null;
         }
-        _processes.put(op.getQName(), op);
-        _descriptors.put(op.getQName(), desc);
+    	EmbeddedProcessConf conf = new EmbeddedProcessConf(op.getQName(), op, desc);
+	    conf.setBaseURI(new File(processStr).toURI());
+        _processes.put(op.getQName(), conf);
 
         fireEvent(new ProcessStoreEvent(ProcessStoreEvent.Type.DEPLOYED, op.getQName(), null));        
         fireEvent(new ProcessStoreEvent(ProcessStoreEvent.Type.ACTIVATED, op.getQName(), null));
@@ -77,7 +79,7 @@ public class EmbeddedStore implements ProcessStore {
 
     public ProcessConf getProcessConfiguration(QName processId) {
         if (_processes.get(processId) != null)
-            return new EmbeddedProcessConf(processId, _processes.get(processId), _descriptors.get(processId));
+            return _processes.get(processId);
         else return null;
     }
 
