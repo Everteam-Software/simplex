@@ -480,4 +480,33 @@ public class RestfulSimPELTest extends TestCase {
         assertTrue(resp.getStatus() == 201);
     }
 
+    public static final String UNUSED_RES =
+            "processConfig.inMem = false;\n" +
+            "processConfig.address = \"/unusedres\";\n" +
+
+            "process UnusedResource {\n" +
+            "   dummy = resource(\"/dummy\"); \n" +
+            "   receive(self) { |query|\n" +
+            "       resp = <response>{dummy}</response>;\n" +
+            "       reply(resp);\n" +
+            "   }\n" +
+            "}";
+
+    // Tests that a resource that's only used in expressions can be manipulater
+    public void testUnusedResource() throws Exception {
+        server.start();
+        server.deploy(UNUSED_RES);
+
+        ClientConfig cc = new DefaultClientConfig();
+        Client c = Client.create(cc);
+
+        WebResource wr = c.resource("http://localhost:3434/unusedres");
+        ClientResponse resp = wr.path("/").accept("application/xml").type("application/xml")
+                .post(ClientResponse.class, "<empty/>");
+        assertTrue(resp.getStatus() == 201);
+
+        String doneResponse = resp.getEntity(String.class);
+        System.out.println("=> " + doneResponse);
+        assertTrue(doneResponse.indexOf("/unusedres") > 0);
+    }
 }
