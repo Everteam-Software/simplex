@@ -234,7 +234,7 @@ public class RestfulSimPELTest extends TestCase {
                 .post(ClientResponse.class, "<simpelWrapper xmlns=\"http://ode.apache.org/simpel/1.0/definition/AllMethods\">foo</simpelWrapper>");
         String response = resp.getEntity(String.class);
         System.out.println("=> " + response);
-        assertEquals("GETPOSTfooPUTbar", response);
+        assertEquals("GET\n itPOSTfooPUTbar", response);
     }
 
     public static final String POST_WITH_201 =
@@ -508,5 +508,38 @@ public class RestfulSimPELTest extends TestCase {
         String doneResponse = resp.getEntity(String.class);
         System.out.println("=> " + doneResponse);
         assertTrue(doneResponse.indexOf("/unusedres") > 0);
+    }
+
+    public static final String CR_IN_RESP =
+            "processConfig.inMem = false;\n" +
+            "processConfig.address = \"/crinresp\";\n" +
+
+            "function splitting(csv) {\n" +
+            "   return <text>{csv.split(\"\\n\")[0]}</text>;\n" +
+            "}" +
+            "process RequestError {\n" +
+            "   receive(self) { |query|\n" +
+            "       resp = request(\"http://localhost:3434/gppd\");\n" +
+            "       resp2 = splitting(resp);\n" +
+            "       print(\"-- \" + resp2.text());\n" +
+            "       reply(resp2);\n" +
+            "   }\n" +
+            "}";
+
+    public void testCRInREsponse() throws Exception {
+        server.start();
+        server.deploy(CR_IN_RESP);
+
+        ClientConfig cc = new DefaultClientConfig();
+        Client c = Client.create(cc);
+
+        WebResource wr = c.resource("http://localhost:3434/crinresp");
+        ClientResponse resp = wr.path("/").accept("application/xml").type("application/xml")
+                .post(ClientResponse.class, "<empty/>");
+        assertTrue(resp.getStatus() == 201);
+
+        String response = resp.getEntity(String.class);
+        assertTrue(response.indexOf("<text>GET</text>") > 0);
+        System.out.println("=> " + response);
     }
 }

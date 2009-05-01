@@ -357,4 +357,43 @@ public class SimPELRuntimeTest extends TestCase {
         assertTrue(DOMUtils.domToString(result).indexOf("true") > 0);
     }
 
+    public static final String FORALL =
+            "processConfig.inMem = true;\n" +
+
+            "process ForAll {\n" +
+            "    receive(itwPl, itwOp) { |initial|\n" +
+            "        start = 1; \n" +
+            "        forall(m=start; 5+5) { \n"+
+            "           num = <num>{m}</num>; \n" +
+            "           invoke(statefulAdder, add, num); \n" +
+            "        }" +
+            "        reply(initial);\n" +
+            "    }\n" +
+            "}";
+
+    public void testForAll() throws Exception {
+        final int[] total = new int[1];
+        total[0] = 0;
+        server.options.setMessageSender(new MessageSender() {
+            public Node send(String recipient, String operation, Node elmt) {
+                if (recipient.equals("statefulAdder") && operation.equals("add")) {
+                    total[0] = total[0] + Integer.parseInt(elmt.getTextContent());
+                    System.out.println("  " + Integer.parseInt(elmt.getTextContent()));
+                    Document doc = DOMUtils.newDocument();
+                    return doc.createTextNode(""+total[0]);
+                } else return null;
+            }
+        });
+        server.start();
+        server.deploy(FORALL);
+
+        Element wrapper = DOMUtils.stringToDOM(
+                "<xd:itwOpRequest xmlns:xd=\"http://ode.apache.org/simpel/1.0/definition/ForAll\">0</xd:itwOpRequest>");
+        Element result = server.sendMessage("itwPl", "itwOp", wrapper);
+        assertNotNull(result);
+        System.out.println(DOMUtils.domToString(result));
+        System.out.println("=> " + total[0]);
+        assertEquals(55, total[0]);
+    }
+
 }

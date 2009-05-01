@@ -29,7 +29,7 @@ public class TestAllMethodsResource {
     @GET
     @Produces("application/xml")
     public String get() {
-        return "<get>GET</get>";
+        return "<get>GET\n it</get>";
     }
 
     @POST

@@ -1,7 +1,7 @@
 processConfig.inMem = false;
 processConfig.address = "/absence";
 
-shotBase = "http://localhost:3000"
+shotBase = "http://localhost:3000";
 myBase = "http://localhost:3434";
 
 function addHeaders(login, password, req) {
