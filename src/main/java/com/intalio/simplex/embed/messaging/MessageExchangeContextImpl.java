@@ -196,7 +196,7 @@ public class MessageExchangeContextImpl implements MessageExchangeContext {
     }
 
     private void faultFromHttpStatus(int s, String response, RESTOutMessageExchange mex) {
-        QName faultName = new QName(null, "http401");
+        QName faultName = new QName(null, "http" + s);
         Document odeMsg = DOMUtils.newDocument();
         Element odeMsgEl = odeMsg.createElementNS(null, "message");
         odeMsg.appendChild(odeMsgEl);
@@ -226,7 +226,7 @@ public class MessageExchangeContextImpl implements MessageExchangeContext {
         Element failureElmt = doc.createElement(errElmt);
         failureElmt.setTextContent(text);
         String fullMsg = "Request to " + calledUrl + " failed. " + text;
-        __log.debug(fullMsg);
+        __log.info(fullMsg);
         mex.replyWithFailure(MessageExchange.FailureType.FORMAT_ERROR, fullMsg, failureElmt);
     }
 
