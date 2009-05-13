@@ -20,10 +20,11 @@ package com.intalio.simplex.embed.messaging;
 
 import com.intalio.simplex.embed.MessageSender;
 import com.intalio.simplex.http.datam.FEJOML;
+import static com.intalio.simplex.embed.messaging.RequestUtils.*;
+
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
-import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.client.filter.LoggingFilter;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
@@ -40,9 +41,6 @@ import javax.wsdl.Operation;
 import javax.wsdl.Part;
 import javax.xml.namespace.QName;
 import java.io.UnsupportedEncodingException;
-import java.io.PrintStream;
-import java.io.OutputStream;
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -80,9 +78,9 @@ public class MessageExchangeContextImpl implements MessageExchangeContext {
         WebResource wr = c.resource(res.getUrl());
         if (restOutMessageExchange.getRequest() != null) {
             Element payload = restOutMessageExchange.getRequest().getMessage();
-            String cntType = contentType(payload);
+            String cntType = contentType(stripWrappers(payload));
             WebResource.Builder wrb = wr.type(cntType);
-            handleOutHeaders(payload, wrb);
+            handleOutHeaders(stripWrappers(payload), wrb);
             if (!"GET".equals(res.getMethod().toUpperCase())) {
                 String cnt = FEJOML.fromXML(unwrapToPayload(payload), cntType);
                 try {
@@ -181,20 +179,6 @@ public class MessageExchangeContextImpl implements MessageExchangeContext {
         return styles;
     }
 
-    private Node unwrapToPayload(Element message) {
-        Element root = DOMUtils.getFirstChildElement(DOMUtils.getFirstChildElement(message));
-        // TODO this assumption only works with SimPEL, in the general case we could have a NodeList
-        // and should therefore send the whole part element
-        Node payload;
-        if (DOMUtils.getFirstChildElement(root) != null)
-            payload = DOMUtils.getFirstChildElement(root);
-        else {
-            Document doc = DOMUtils.newDocument();
-            payload = doc.createTextNode(DOMUtils.getTextContent(root));
-        }
-        return payload;
-    }
-
     private void faultFromHttpStatus(int s, String response, RESTOutMessageExchange mex) {
         QName faultName = new QName(null, "http" + s);
         Document odeMsg = DOMUtils.newDocument();
@@ -211,16 +195,6 @@ public class MessageExchangeContextImpl implements MessageExchangeContext {
         mex.replyWithFault(faultName, responseMsg);
     }
 
-    private String contentType(Element req) {
-        Element root = DOMUtils.getFirstChildElement(DOMUtils.getFirstChildElement(req));
-        Element ce = DOMUtils.findChildByName(withHeaders(root), new QName(null, "Content_Type"));
-        if (ce != null) {
-            String ces = ce.getTextContent();
-            if (FEJOML.recognizeType(ces)) return ces;
-        }
-        return FEJOML.XML;
-    }
-
     private void fail(String calledUrl, String errElmt, String text, RESTOutMessageExchange mex) {
         Document doc = DOMUtils.newDocument();
         Element failureElmt = doc.createElement(errElmt);
@@ -228,46 +202,6 @@ public class MessageExchangeContextImpl implements MessageExchangeContext {
         String fullMsg = "Request to " + calledUrl + " failed. " + text;
         __log.info(fullMsg);
         mex.replyWithFailure(MessageExchange.FailureType.FORMAT_ERROR, fullMsg, failureElmt);
-    }
-
-    private void handleOutHeaders(Element msg, WebResource.Builder wr) {
-        Element root = DOMUtils.getFirstChildElement(DOMUtils.getFirstChildElement(msg));
-        Element headers = withHeaders(root);
-        if (headers != null) {
-            NodeList headerElmts = headers.getChildNodes();
-            for (int m = 0; m < headerElmts.getLength(); m++) {
-                Node n = headerElmts.item(m);
-                if (n.getNodeType() == Node.ELEMENT_NODE) {
-                    if (n.getNodeName().equals("basicAuth")) {
-                        Element login = DOMUtils.findChildByName((Element) n, new QName(null, "login"));
-                        Element password = DOMUtils.findChildByName((Element) n, new QName(null, "password"));
-                        if (login != null && password != null) {
-                            // TODO rely on Jersey basic auth once 1.0.2 is released
-                            try {
-                                byte[] unencoded = (login.getTextContent() + ":" + password.getTextContent()).getBytes("UTF-8");
-                                String credString = Base64.encode(unencoded);
-                                String authHeader = "Basic " + credString;
-                                wr.header("authorization", authHeader);
-                            } catch (UnsupportedEncodingException e) {
-                                throw new RuntimeException(e);
-                            }
-                        }
-                    } else if (!n.getNodeName().equals("Content_Type")) {
-                        wr.header(n.getNodeName().replaceAll("_", "-"), n.getTextContent());
-                    }
-                }
-            }
-        }
-    }
-
-    private Element withHeaders(Element element) {
-        Element res = DOMUtils.findChildByName(element, new QName(null, "headers"));
-        if (res == null) {
-            Element headers = element.getOwnerDocument().createElement("headers");
-            element.appendChild(headers);
-            res = headers;
-        }
-        return res;
     }
 
     /**

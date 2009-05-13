@@ -370,6 +370,7 @@ public class RestfulSimPELTest extends TestCase {
             "   resp = <resp></resp>; \n" +
             "   sub = resource(\"/sub/{name}\"); \n" +
             "   done = resource(\"/done\"); \n" +
+            "   print(\"=== \" + sub); \n" +
             "   scope { \n" +
             "       receive(done) { |msg| \n " +
             "           reply(resp); \n" +
@@ -542,4 +543,50 @@ public class RestfulSimPELTest extends TestCase {
         assertTrue(response.indexOf("<text>GET</text>") > 0);
         System.out.println("=> " + response);
     }
+
+    public static final String RESOURCE_IN_WHILE =
+            "processConfig.inMem = false;\n" +
+            "processConfig.address = \"/resinwhile\";\n" +
+
+            "process ResourceInWhile { \n" +
+            "  receive(self) {|s| reply();} \n" +
+            "  counter = 0; \n" +
+            "  while(counter < 5) { \n" +
+            "    scope { \n" +
+            "      callback = resource(\"/callback/\" + counter); \n" +
+            "      print(callback); \n" +
+            "      payload = receive(callback); \n" +
+            "      print(counter + \" \" + payload); \n" +
+            "      resp = <r>ok from {callback}</r>; \n" +
+            "      reply(resp, callback); \n" +
+            "      counter = counter + 1; \n" +
+            "    }\n" +
+            "  }\n" +
+            "}";
+
+    public void testResourceInWhile() throws Exception {
+        System.out.println(RESOURCE_IN_WHILE);
+        server.start();
+        server.deploy(RESOURCE_IN_WHILE);
+
+        ClientConfig cc = new DefaultClientConfig();
+        Client c = Client.create(cc);
+
+        WebResource wr = c.resource("http://localhost:3434/resinwhile");
+        ClientResponse resp = wr.path("/").accept("application/xml").type("application/xml")
+                .post(ClientResponse.class, "<empty/>");
+        assertTrue(resp.getStatus() == 201);
+
+        String location = resp.getMetadata().get("Location").get(0);
+        for (int m = 0; m < 5; m++) {
+            WebResource resM = c.resource(location + "/callback/" + m);
+            ClientResponse respM = resM.accept("application/xml").type("application/xml")
+                    .post(ClientResponse.class, "<foo>foo " + m + "</foo>");
+            String responseM = respM.getEntity(String.class);
+            System.out.println("=> " + responseM);
+            assertTrue(responseM.indexOf("callback/"+m) > 0);
+        }
+    }
+
+
 }

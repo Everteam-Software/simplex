@@ -46,11 +46,11 @@ public class ScriptBasedStore extends EmbeddedStore {
     public ScriptBasedStore(File scriptsDir, File workDir) {
         _scriptsDir = scriptsDir;
         _workDir = workDir;
+        _poller = new ScriptPoller();
     }
 
     @Override
     protected void start() {
-        _poller = new ScriptPoller();
         Thread poller = new Thread(_poller);
         poller.setDaemon(true);
         poller.start();
@@ -60,7 +60,7 @@ public class ScriptBasedStore extends EmbeddedStore {
         _poller.stop();
     }
 
-    private class ScriptPoller implements Runnable {
+    public class ScriptPoller implements Runnable {
         private boolean run = true;
         private boolean firstRun = true;
 
@@ -78,56 +78,8 @@ public class ScriptBasedStore extends EmbeddedStore {
         public void run() {
             while (run) {
                 try {
-                    List<File> scripts = listFilesRecursively(_scriptsDir, _scriptsFilter);
-                    List<File> cbps = listFilesRecursively(_workDir, _cbpFilter);
-
-                    // This whole mumbo jumbo is just about populating these lists
-                    Set<File> toActivate = new HashSet<File>();
-                    Set<File> newer = new HashSet<File>();
-                    Set<File> unknown = new HashSet<File>();
-                    Set<File> removed = new HashSet<File>(cbps);
-
-                    for (File script : scripts) {
-                        String scriptRelative = noExt(relativePath(_scriptsDir, script));
-
-                        // Can't easily reuse findNextVersion as we also want to know about removed scripts
-                        int oldies = 0;
-                        int scriptCbps = 0;
-                        for (File cbp : cbps) {
-                            String cbpRelative = noVerExt(relativePath(_workDir, cbp));
-                            if (scriptRelative.equals(cbpRelative)) {
-                                removed.remove(cbp);
-                                scriptCbps++;
-                                if (cbp.lastModified() < script.lastModified()) oldies++;
-                            }
-                        }
-                        if (scriptCbps > 0) {
-                            if (oldies == scriptCbps) newer.add(script);
-                            else if (firstRun) toActivate.add(script);
-                        } else unknown.add(script);
-                    }
-
-                    // Newer and unknown processes both just need compile (at least for now)
-                    newer.addAll(unknown);
-                    for (File p : newer) {
-                        __log.debug("Recompiling " + p);
-                        ProcessModel oprocess = compileProcess(p, cbps);
-                        __log.info("Process " + oprocess.getQName().getLocalPart()  + " deployed successfully.\n");
-                    }
-
-                    for (File p : toActivate) {
-                        reloadProcess(p, cbps);
-                    }
-
-                    for (File p : removed) {
-                        Serializer ser = new Serializer(new FileInputStream(p));
-                        ProcessModel oprocess = ser.readPModel();
-                        QName pid = toPid(oprocess.getQName(), versionFromCbpName(p.getName()));
-                        fireEvent(new ProcessStoreEvent(ProcessStoreEvent.Type.UNDEPLOYED, pid, null));
-                        _processes.remove(pid);
-                        p.delete();
-                    }
-
+                    scanAndDeploy();
+                    
                     try {
                         Thread.sleep(POLLING_FREQ);
                     } catch (InterruptedException e) {
@@ -144,6 +96,58 @@ public class ScriptBasedStore extends EmbeddedStore {
                 }
             }
 
+        }
+
+        public void scanAndDeploy() throws IOException, ClassNotFoundException {
+            List<File> scripts = listFilesRecursively(_scriptsDir, _scriptsFilter);
+            List<File> cbps = listFilesRecursively(_workDir, _cbpFilter);
+
+            // This whole mumbo jumbo is just about populating these lists
+            Set<File> toActivate = new HashSet<File>();
+            Set<File> newer = new HashSet<File>();
+            Set<File> unknown = new HashSet<File>();
+            Set<File> removed = new HashSet<File>(cbps);
+
+            for (File script : scripts) {
+                String scriptRelative = noExt(relativePath(_scriptsDir, script));
+
+                // Can't easily reuse findNextVersion as we also want to know about removed scripts
+                int oldies = 0;
+                int scriptCbps = 0;
+                for (File cbp : cbps) {
+                    String cbpRelative = noVerExt(relativePath(_workDir, cbp));
+                    if (scriptRelative.equals(cbpRelative)) {
+                        removed.remove(cbp);
+                        scriptCbps++;
+                        if (cbp.lastModified() < script.lastModified()) oldies++;
+                    }
+                }
+                if (scriptCbps > 0) {
+                    if (oldies == scriptCbps) newer.add(script);
+                    else if (firstRun) toActivate.add(script);
+                } else unknown.add(script);
+            }
+
+            // Newer and unknown processes both just need compile (at least for now)
+            newer.addAll(unknown);
+            for (File p : newer) {
+                __log.debug("Recompiling " + p);
+                ProcessModel oprocess = compileProcess(p, cbps);
+                __log.info("Process " + oprocess.getQName().getLocalPart()  + " deployed successfully.\n");
+            }
+
+            for (File p : toActivate) {
+                reloadProcess(p, cbps);
+            }
+
+            for (File p : removed) {
+                Serializer ser = new Serializer(new FileInputStream(p));
+                ProcessModel oprocess = ser.readPModel();
+                QName pid = toPid(oprocess.getQName(), versionFromCbpName(p.getName()));
+                fireEvent(new ProcessStoreEvent(ProcessStoreEvent.Type.UNDEPLOYED, pid, null));
+                _processes.remove(pid);
+                p.delete();
+            }
         }
 
         private void stop() {
@@ -266,4 +270,7 @@ public class ScriptBasedStore extends EmbeddedStore {
         }
     }
 
+    public ScriptPoller getPoller() {
+        return _poller;
+    }
 }
