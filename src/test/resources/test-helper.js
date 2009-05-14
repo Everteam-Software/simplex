@@ -30,15 +30,21 @@ function request(url, method, payload) {
 
     var resp = null;
     if (payload) {
-        // Unwrap the DOM
-        payload = e4xToDOM(payload);
         var wr = c.resource(url);
-        var cntType = reqUtils.contentType(payload);
-        var wrb = wr.type(cntType);
-        reqUtils.handleOutHeaders(payload, wrb);
+        if (typeof payload == "xml") {
+            // Unwrap the DOM
+            payload = e4xToDOM(payload);
+            var cntType = reqUtils.contentType(payload);
+            var wrb = wr.type(cntType);
+            reqUtils.handleOutHeaders(payload, wrb);
+            var cnt = fejoml.fromXML(payload, cntType);
+        } else {
+            var wrb = wr.type("text/plain");
+            var cnt = payload;
+        }
 
+        print(method + " " + cnt);
         if (method.toUpperCase() != "GET") {
-            cnt = fejoml.fromXML(payload, cntType);
             resp = wrb.method(method.toUpperCase(), jz.ClientResponse, cnt);
         } else {
             resp = wrb.method(method.toUpperCase(), jz.ClientResponse);
@@ -49,10 +55,16 @@ function request(url, method, payload) {
 
     if (resp.getStatus() == 302) {
         resp = request(resp.getMetadata().getFirst("Location"), method, payload);
+    } else if (resp.getStatus() >= 400) {
+        throw "Request error, return code: " + resp.getStatus();
     }
 
     var respPayload = resp.getEntity(java.lang.String);
-    try { respPayload = new XML(respPayload = new XML(respPayload.substring(39))); } catch(err) { };
+    try {
+        respPayload = new XML(respPayload = new XML(respPayload.substring(39)));
+    } catch(err) {
+        respPayload = new String(respPayload.toString()); // Converting the Java string back to JS
+    };
 
 
     return {status: resp.getStatus(), payload: respPayload};
