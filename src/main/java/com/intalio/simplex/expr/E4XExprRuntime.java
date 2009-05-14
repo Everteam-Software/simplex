@@ -243,7 +243,7 @@ public class E4XExprRuntime implements ExpressionLanguageRuntime {
                 _env.put(name, xmlObj);
                 return xmlObj;
             } catch (Exception e) {
-                throw new RuntimeException("Error accessing variable " + name + ".", e);
+                throw new RuntimeException("Error accessing variable " + name + ": " + e.toString(), e);
             }
         }
 

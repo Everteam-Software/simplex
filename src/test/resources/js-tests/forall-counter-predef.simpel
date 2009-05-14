@@ -1,10 +1,11 @@
 // Testing SimPEL issue #18 with a forall counter variable
 // already defined.
 
-processConfig.address = "/forallcounterpredef";
+processConfig.address = "/forall-counter-predef";
 
 process ForAllCounterPredef {
     receive(self) { |s|
+        counter = 0;
         forall(counter = 0 ; 10) {
             _counter = counter;
         }

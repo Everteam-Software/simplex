@@ -14,23 +14,30 @@ import java.io.IOException;
 public class JSRunnerTest extends TestCase {
 
     public void testAll() throws Exception {
-        Context cx = ContextFactory.getGlobal().enterContext();
-        cx.setErrorReporter(new ToolErrorReporter(true));
-
-        File jsTestsDir = new File(getClass().getClassLoader().getResource("js-tests").getFile());
-        TestServer server= new TestServer();
-        server.start(jsTestsDir);
-
-        String testPath = "forall-counter-predef.js";
-        File absoluteTestFile = new File(jsTestsDir, testPath).getAbsoluteFile();
-        Scriptable scope = new JSTopLevel(cx, absoluteTestFile.getParent());
-        Object ret = null;
+        TestServer server = null;
         try {
-            ret = cx.evaluateReader(scope, new FileReader(absoluteTestFile), testPath, 0, null);
-        } catch (JavaScriptException e) {
-            e.printStackTrace();
+            Context cx = ContextFactory.getGlobal().enterContext();
+            cx.setErrorReporter(new ToolErrorReporter(true));
+
+            File jsTestsDir = new File(getClass().getClassLoader().getResource("js-tests").getFile());
+            server = new TestServer();
+            server.start(jsTestsDir);
+
+            String testPath = "test-runner.js";
+            File absoluteTestFile = new File(getClass().getClassLoader().getResource(testPath).getFile());
+            Scriptable scope = new JSTopLevel(cx, absoluteTestFile.getParent());
+            try {
+                cx.evaluateReader(scope, new FileReader(absoluteTestFile), testPath, 0, null);
+                // Checking result
+                Boolean success = (Boolean) cx.evaluateString(scope, "JSpec.stats.failures == 0", "<test>", 0, null);
+                assertTrue("Javascript tests failed!", success);
+            } catch (JavaScriptException e) {
+                e.printStackTrace();
+                fail("Script error: " + e);
+            }
+        } finally {
+            if (server != null) server.stop();
         }
-        System.out.println("=> " + ret);
     }
 }
 

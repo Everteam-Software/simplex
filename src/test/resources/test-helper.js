@@ -1,5 +1,6 @@
 var ROOT = "http://localhost:3434";
 
+/*
 function fail(msg) {
     throw msg;
 }
@@ -9,6 +10,8 @@ function assert(msg, cond) {
     if (!realCond) fail(msg);
     else realCond;
 }
+
+*/
 
 var jz = Packages.com.sun.jersey.api.client;
 var reqUtils = Packages.com.intalio.simplex.embed.messaging.RequestUtils;
