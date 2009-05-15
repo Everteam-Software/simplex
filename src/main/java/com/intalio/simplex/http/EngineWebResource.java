@@ -178,7 +178,7 @@ public class EngineWebResource {
 
     public static void stopRestfulServer() {
         try {
-            _server.stop();
+            if (_server != null) _server.stop();
             _server = null;
             _serverLifecyle = null;
             _engineResources = null;

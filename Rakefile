@@ -31,16 +31,10 @@ COMMONS             = struct(
   :logging          =>"commons-logging:commons-logging:jar:1.1",
   :primitives       =>"commons-primitives:commons-primitives:jar:1.0"
 )
-DERBY               = "org.apache.derby:derby:jar:10.4.1.3"
-GERONIMO            = struct(
-  :kernel           =>"org.apache.geronimo.modules:geronimo-kernel:jar:2.0.1",
-  :transaction      =>"org.apache.geronimo.components:geronimo-transaction:jar:2.0.1",
-  :connector        =>"org.apache.geronimo.components:geronimo-connector:jar:2.0.1"
-)
-HSQLDB              = "hsqldb:hsqldb:jar:1.8.0.7"
+H2                  = "com.h2database:h2:jar:1.1.111"
 JAVAX               = struct(
   :transaction      =>"org.apache.geronimo.specs:geronimo-jta_1.1_spec:jar:1.1",
-  :resource         =>"org.apache.geronimo.specs:geronimo-j2ee-connector_1.5_spec:jar:1.0",
+#  :resource         =>"org.apache.geronimo.specs:geronimo-j2ee-connector_1.5_spec:jar:1.0",
   :persistence      =>"javax.persistence:persistence-api:jar:1.0",
   :rest             =>"javax.ws.rs:jsr311-api:jar:1.0"
 )
@@ -53,7 +47,7 @@ ODE                 = group("ode-bpel-api", "ode-bpel-compiler", "ode-bpel-dao",
 OPENJPA             = ["org.apache.openjpa:openjpa:jar:1.1.0",
                        "net.sourceforge.serp:serp:jar:1.13.1"]
 SIMPEL              = "com.intalio.simpel:simpel:jar:0.2-SNAPSHOT"
-TRANQL              = ["tranql:tranql-connector:jar:1.1", COMMONS.primitives]
+SLF4J               = group(%w{ slf4j-api slf4j-log4j12 }, :under=>"org.slf4j", :version=>"1.4.3")
 WSDL4J              = "wsdl4j:wsdl4j:jar:1.6.2"
 XERCES              = "xerces:xercesImpl:jar:2.8.1"
 
@@ -71,13 +65,14 @@ define "simplex" do
   manifest["Implementation-Vendor"] = "Intalio, Inc."
   meta_inf << file("NOTICE") << file("LICENSE")
 
-  local_libs = file(_("lib/e4x-grammar-0.2.jar")), file(_("lib/rhino-1.7R2pre-patched.jar"))
+  local_libs = file(_("lib/e4x-grammar-0.2.jar")), file(_("lib/rhino-1.7R2pre-patched.jar")),
+    file(_("lib/btm-1.3.2.jar"))
 
-  compile.with local_libs, SIMPEL, ODE, LOG4J, JAVAX.transaction, HSQLDB, JERSEY, 
-    JAVAX.rest, JETTY, WSDL4J, GERONIMO.transaction, JAVAX.resource
+  compile.with local_libs, SIMPEL, ODE, LOG4J, JAVAX.transaction, JERSEY, 
+    JAVAX.rest, JETTY, H2, WSDL4J
 
-  test.with COMMONS.lang, COMMONS.logging, LOG4J, ASM, DERBY, ODE,
-    TRANQL, OPENJPA, GERONIMO.connector, JAVAX.persistence,
+  test.with COMMONS.lang, COMMONS.logging, LOG4J, ASM, ODE, H2,
+    OPENJPA, JAVAX.persistence, SLF4J,
     XERCES, ANTLR_RT, local_libs, COMMONS.collections
   package :jar
 
@@ -88,9 +83,9 @@ define "simplex" do
   package(:zip, :id=>'intalio-simplex').path("intalio-#{id}-#{version}").tap do |zip|
     zip.include meta_inf + ["README", "src/main/samples/"].map { |f| path_to(f) }
 
-    zip.path('lib').include artifacts(SIMPEL, ODE, LOG4J, JAVAX.transaction, JAVAX.resource,
-      COMMONS.lang, COMMONS.logging, LOG4J, WSDL4J, ASM, JERSEY, DERBY, TRANQL, OPENJPA, 
-      GERONIMO.transaction, GERONIMO.connector, JAVAX.persistence, JAVAX.rest, JETTY, 
+    zip.path('lib').include artifacts(SIMPEL, ODE, LOG4J, JAVAX.transaction,
+      COMMONS.lang, COMMONS.logging, LOG4J, WSDL4J, ASM, JERSEY, OPENJPA, H2,
+      JAVAX.persistence, JAVAX.rest, JETTY, SLF4J,
       XERCES, ANTLR_RT, local_libs, COMMONS.collections, local_libs),
       package(:zip, :id=>'simplex-public-html')
 

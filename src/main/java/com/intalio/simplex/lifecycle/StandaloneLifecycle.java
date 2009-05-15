@@ -23,11 +23,14 @@ import com.intalio.simplex.embed.ServerLifecycle;
 import org.apache.log4j.Logger;
 import org.apache.ode.il.config.OdeConfigProperties;
 import org.apache.ode.il.dbutil.Database;
+import org.apache.ode.utils.GUID;
 
 import java.io.*;
 import java.util.Properties;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+
+import bitronix.tm.resource.jdbc.PoolingDataSource;
 
 public class StandaloneLifecycle extends ServerLifecycle {
     
@@ -56,33 +59,9 @@ public class StandaloneLifecycle extends ServerLifecycle {
         unzipPublicHtml();
     }
 
-    protected void initDataSource() {
-        try {
-            Properties p = new Properties();
-            if (!_derbyDir.exists()) {
-                p.put("openjpa.jdbc.SynchronizeMappings", "buildSchema(ForeignKeys=false)");
-                p.put(OdeConfigProperties.PROP_DB_EMBEDDED_CREATE, "true");
-            }
-            p.put(OdeConfigProperties.PROP_DB_EMBEDDED_NAME, "db");
-
-            OdeConfigProperties odeConfig = new OdeConfigProperties(p, "");
-            _db = new Database(odeConfig);
-            _db.setTransactionManager(_txMgr);
-            _db.setWorkRoot(_workDir);
-
-            _db.start();
-            _ds = _db.getDataSource();
-        } catch (Exception ex) {
-            throw new RuntimeException("Database initialization failed.", ex);
-        }
-    }
-
-    protected void initDAO() {
-        try {
-            _daoCF = _db.createDaoCF();
-        } catch (Exception ex) {
-            throw new RuntimeException("Database connection configuration failed.", ex);
-        }
+    @Override
+    protected String getDbUrl() {
+        return "jdbc:h2:" + _workDir.getAbsolutePath() + "/simplexdb";
     }
 
     protected void initProcessStore() {

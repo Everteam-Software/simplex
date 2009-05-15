@@ -32,11 +32,9 @@ import org.apache.ode.bpel.evtproc.DebugBpelEventListener;
 import org.apache.ode.bpel.iapi.*;
 import org.apache.ode.bpel.memdao.BpelDAOConnectionFactoryImpl;
 import org.apache.ode.il.dbutil.Database;
-import org.apache.ode.il.config.OdeConfigProperties;
 import org.apache.ode.scheduler.simple.JdbcDelegate;
 import org.apache.ode.scheduler.simple.SimpleScheduler;
 import org.apache.ode.utils.GUID;
-import org.hsqldb.jdbc.jdbcDataSource;
 
 import javax.sql.DataSource;
 import javax.transaction.TransactionManager;
@@ -45,6 +43,9 @@ import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import bitronix.tm.TransactionManagerServices;
+import bitronix.tm.resource.jdbc.PoolingDataSource;
 
 public class ServerLifecycle {
     private static final Logger __log = Logger.getLogger(EmbeddedServer.class);
@@ -90,7 +91,7 @@ public class ServerLifecycle {
     }
 
     public void clean() {
-        _store.stop();
+        if (_store != null) _store.stop();
         EngineWebResource.stopRestfulServer();
         if (_db != null) _db.shutdown();
         _db = null;
@@ -127,28 +128,28 @@ public class ServerLifecycle {
     }
 
     protected void initDAO() {
-        // TODO supporting only in memory for now, extend to datasource usage
         _daoCF = new BpelDAOConnectionFactoryImpl(_txMgr);
     }
 
     protected void initTxMgr() {
-        if(_txMgr == null) {
-            try {
-                GeronimoTxFactory txFactory = new GeronimoTxFactory();
-                _txMgr = txFactory.getTransactionManager();
-            } catch (Exception e) {
-                __log.fatal("Couldn't initialize a transaction manager using Geronimo's transaction factory.", e);
-                throw new RuntimeException("Couldn't initialize a transaction manager using " + "Geronimo's transaction factory.", e);
-            }
-        }
+        _txMgr = TransactionManagerServices.getTransactionManager();
     }
 
     protected void initDataSource() {
-        jdbcDataSource hsqlds = new jdbcDataSource();
-        hsqlds.setDatabase("jdbc:hsqldb:mem:" + new GUID().toString());
-        hsqlds.setUser("sa");
-        hsqlds.setPassword("");
-        _ds = hsqlds;
+        PoolingDataSource btmDs = new PoolingDataSource();
+        btmDs.setClassName("org.h2.jdbcx.JdbcDataSource");
+        btmDs.setUniqueName(new GUID().toString());
+        btmDs.setMaxPoolSize(_options.getOdeProperties().getPoolMaxSize());
+        btmDs.setMinPoolSize(_options.getOdeProperties().getPoolMinSize());
+        btmDs.setAllowLocalTransactions(true);
+        btmDs.getDriverProperties().setProperty("URL", getDbUrl());
+        btmDs.getDriverProperties().setProperty("user", "sa");
+        btmDs.getDriverProperties().setProperty("password", "");
+        _ds = btmDs;
+    }
+
+    protected String getDbUrl() {
+        return "jdbc:h2:mem:mydb;DB_CLOSE_DELAY=-1";
     }
 
     protected Scheduler createScheduler() {
@@ -163,6 +164,7 @@ public class ServerLifecycle {
 
                 if (!result.next()) {
                     String dbProductName = metaData.getDatabaseProductName();
+                    System.out.println("-- " + dbProductName);
                     if (dbProductName.indexOf("Derby") >= 0) {
                         stmt = conn.createStatement();
                         stmt.execute(DERBY_SCHEDULER_DDL1);
@@ -174,7 +176,7 @@ public class ServerLifecycle {
                         stmt.execute(DERBY_SCHEDULER_DDL3);
                         stmt.close();
                     }
-                    if (dbProductName.indexOf("HSQL") >= 0) {
+                    if (dbProductName.indexOf("HSQL") >= 0 || dbProductName.indexOf("H2") >= 0) {
                         stmt = conn.createStatement();
                         stmt.execute(HSQL_SCHEDULER_DDL);
                     }
@@ -275,7 +277,7 @@ public class ServerLifecycle {
                     " details LONGVARBINARY NULL," +
                     " PRIMARY KEY(jobid));\n" +
                     "CREATE INDEX IDX_ODE_JOB_TS ON ODE_JOB (ts);\n" +
-                    "CREATE INDEX IDX_ODE_JOB_NODEID ON ODE_JOB (nodeid);";
+                    "CREATE INDEX IDX_ODE_JOB_NODEID ON ODE_JOB (nodeid);\n";
 
     private static final String DERBY_SCHEDULER_DDL1 =
             "CREATE TABLE ODE_JOB (" +
