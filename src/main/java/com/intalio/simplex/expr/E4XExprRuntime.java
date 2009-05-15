@@ -5,7 +5,7 @@ import org.apache.ode.bpel.rtrep.common.ConfigurationException;
 
 import org.apache.ode.bpel.common.FaultException;
 import com.intalio.simpel.omodel.SimPELExpr;
-import com.intalio.simpel.expr.JSTopLevel;
+import com.intalio.simpel.util.JSTopLevel;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.xsd.Duration;
 import org.apache.log4j.Logger;
@@ -243,7 +243,7 @@ public class E4XExprRuntime implements ExpressionLanguageRuntime {
                 _env.put(name, xmlObj);
                 return xmlObj;
             } catch (Exception e) {
-                throw new RuntimeException("Error accessing variable " + name + ".", e);
+                throw new RuntimeException("Error accessing variable " + name + ": " + e.toString(), e);
             }
         }
 

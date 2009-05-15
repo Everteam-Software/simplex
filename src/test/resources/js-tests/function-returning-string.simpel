@@ -1,0 +1,15 @@
+// Tests the call to a JS function returning a simple string
+
+processConfig.address = "/fn-return-str";
+
+var appendStr = ". Yeeha!";
+function helloPrepend(p) {
+    return "Howdy " + p.text();
+}
+
+process FunctionReturningString {
+   receive(self) { |inReq|
+       outRes = helloPrepend(inReq) + appendStr;
+       reply(outRes);
+   }
+}

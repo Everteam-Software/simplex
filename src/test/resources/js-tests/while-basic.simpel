@@ -1,0 +1,14 @@
+processConfig.address = "/basic-while";
+
+process BasicWhileLoop {
+    receive(self) { |counter|
+        intCounter = parseInt(counter.text());
+
+        // Fibonacci number
+        i = 0; j = 1; cur = 1;
+        while (cur <= intCounter) {
+            k = i; i = j; j = k+j; cur = cur+1;
+        }
+        reply(i);
+    }
+}
