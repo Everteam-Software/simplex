@@ -154,13 +154,15 @@ public class EngineWebResource {
 			String webappFolder = standaloneLifecycle.getWorkDir()+ "/../webapps";
 			File simplexHome = new File(webappFolder);
 			File[] warFiles = simplexHome.listFiles(appFilter);
-			for (File warFile : warFiles) {
-				WebAppContext webapp = new WebAppContext();
-				String warName = warFile.getName();
-				String appName = (warFile.isDirectory()) ? warName : warName.substring(0,warName.indexOf(".war"));
-				webapp.setContextPath("/" + appName);
-				webapp.setWar(warFile.getAbsolutePath());
-				handlerList.addHandler(webapp);
+			if(warFiles!=null) {
+			    for (File warFile : warFiles) {
+    				WebAppContext webapp = new WebAppContext();
+    				String warName = warFile.getName();
+    				String appName = (warFile.isDirectory()) ? warName:warName.substring(0,warName.indexOf(".war"));
+    				webapp.setContextPath("/" + appName);
+    				webapp.setWar(warFile.getAbsolutePath());
+    				handlerList.addHandler(webapp);
+    			}    
 			}
 		}
 
