@@ -83,6 +83,10 @@ public class Options {
         return _backingProps;
     }
 
+    public OdeConfigProperties getOdeProperties() {
+        return _odeProps;
+    }
+
     public boolean isRestful() {
         return _enableRest;
     }

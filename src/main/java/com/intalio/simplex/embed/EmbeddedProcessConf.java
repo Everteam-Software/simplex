@@ -161,4 +161,21 @@ public class EmbeddedProcessConf implements ProcessConf {
     public int getRuntimeVersion() {
         return 2;
     }
+
+    public boolean isCleanupCategoryEnabled(boolean b, CLEANUP_CATEGORY cleanupCategory) {
+        if (cleanupCategory.equals(CLEANUP_CATEGORY.EVENTS))
+            return false;
+        else return true;
+    }
+
+    private HashSet<CLEANUP_CATEGORY> cleanupCats = new HashSet<CLEANUP_CATEGORY>() {{
+        add(CLEANUP_CATEGORY.CORRELATIONS);
+        add(CLEANUP_CATEGORY.INSTANCE);
+        add(CLEANUP_CATEGORY.MESSAGES);
+        add(CLEANUP_CATEGORY.VARIABLES);
+    }};
+
+    public Set<CLEANUP_CATEGORY> getCleanupCategories(boolean b) {
+        return cleanupCats;
+    }
 }

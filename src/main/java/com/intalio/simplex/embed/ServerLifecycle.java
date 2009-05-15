@@ -32,6 +32,7 @@ import org.apache.ode.bpel.evtproc.DebugBpelEventListener;
 import org.apache.ode.bpel.iapi.*;
 import org.apache.ode.bpel.memdao.BpelDAOConnectionFactoryImpl;
 import org.apache.ode.il.dbutil.Database;
+import org.apache.ode.il.config.OdeConfigProperties;
 import org.apache.ode.scheduler.simple.JdbcDelegate;
 import org.apache.ode.scheduler.simple.SimpleScheduler;
 import org.apache.ode.utils.GUID;
@@ -121,7 +122,7 @@ public class ServerLifecycle {
             CountLRUDehydrationPolicy dehy = new CountLRUDehydrationPolicy();
             _server.setDehydrationPolicy(dehy);
         }
-        _server.setConfigProperties(_options.getProperties());
+        _server.setConfigProperties(_options.getOdeProperties());
         _server.init();
     }
 
