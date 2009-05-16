@@ -57,10 +57,7 @@ public class TestLifecycle extends TestCase {
 
     public void testFSDeployUndeploy() throws Exception {
         writeProcessFile("helloworld.simpel", HELLO_WORLD);
-        for(int m= 0; m < 10; m++) {
-            System.out.println(".");
-            Thread.sleep(1000);
-        }
+        Thread.sleep(2000);
         
         ClientConfig cc = new DefaultClientConfig();
         Client c = Client.create(cc);
@@ -81,35 +78,35 @@ public class TestLifecycle extends TestCase {
         new File(rootDir, "work/helloworld.cbp").delete();
     }
 
-//    public void testDeployEmpty() throws Exception {
-//        writeProcessFile("empty.simpel", "");
-//
-//        File cbp = new File(rootDir, "work/empty-1.cbp");
-//        assertTrue(cbp.exists());
-//        assertTrue(cbp.length() == 0);
-//
-//        writeProcessFile("empty.simpel", HELLO_WORLD);
-//        File cbp2 = new File(rootDir, "work/empty-2.cbp");
-//        assertTrue(cbp2.exists());
-//        assertTrue(cbp2.length() > 0);
-//
-//        new File(rootDir, "scripts/empty.simpel").delete();
-//        cbp2.delete();
-//        cbp.delete();
-//    }
-//
-//    public void testLoadInProcess() throws Exception {
-//        writeProcessFile("foo.js", "var foo = 2;\n");
-//        writeProcessFile("load-js.simpel", "load('foo.js');\n" + HELLO_WORLD);
-//
-//        Thread.sleep(2000);
-//        File cbp = new File(rootDir, "work/load-js-1.cbp");
-//        assertTrue(cbp.exists());
-//        assertTrue(cbp.length() > 0);
-//
-//        new File(rootDir, "scripts/load-js.simpel").delete();
-//        cbp.delete();
-//    }
+    public void testDeployEmpty() throws Exception {
+        writeProcessFile("empty.simpel", "");
+
+        File cbp = new File(rootDir, "work/empty-1.cbp");
+        assertTrue(cbp.exists());
+        assertTrue(cbp.length() == 0);
+
+        writeProcessFile("empty.simpel", HELLO_WORLD);
+        File cbp2 = new File(rootDir, "work/empty-2.cbp");
+        assertTrue(cbp2.exists());
+        assertTrue(cbp2.length() > 0);
+
+        new File(rootDir, "scripts/empty.simpel").delete();
+        cbp2.delete();
+        cbp.delete();
+    }
+
+    public void testLoadInProcess() throws Exception {
+        writeProcessFile("foo.js", "var foo = 2;\n");
+        writeProcessFile("load-js.simpel", "load('foo.js');\n" + HELLO_WORLD);
+
+        Thread.sleep(2000);
+        File cbp = new File(rootDir, "work/load-js-1.cbp");
+        assertTrue(cbp.exists());
+        assertTrue(cbp.length() > 0);
+
+        new File(rootDir, "scripts/load-js.simpel").delete();
+        cbp.delete();
+    }
 
     private void writeProcessFile(String filename, String content) throws Exception {
         // speeding things up

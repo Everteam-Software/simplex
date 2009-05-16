@@ -164,7 +164,6 @@ public class ServerLifecycle {
 
                 if (!result.next()) {
                     String dbProductName = metaData.getDatabaseProductName();
-                    System.out.println("-- " + dbProductName);
                     if (dbProductName.indexOf("Derby") >= 0) {
                         stmt = conn.createStatement();
                         stmt.execute(DERBY_SCHEDULER_DDL1);
