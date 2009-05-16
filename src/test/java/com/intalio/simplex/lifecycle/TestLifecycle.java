@@ -57,7 +57,7 @@ public class TestLifecycle extends TestCase {
 
     public void testFSDeployUndeploy() throws Exception {
         writeProcessFile("helloworld.simpel", HELLO_WORLD);
-        Thread.sleep(2000);
+        Thread.sleep(3000);
         
         ClientConfig cc = new DefaultClientConfig();
         Client c = Client.create(cc);
