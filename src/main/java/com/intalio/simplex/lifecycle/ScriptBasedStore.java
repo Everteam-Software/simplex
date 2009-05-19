@@ -122,6 +122,15 @@ public class ScriptBasedStore extends EmbeddedStore {
                         if (cbp.lastModified() < script.lastModified()) oldies++;
                     }
                 }
+
+                // Bailing out if the script is in the future, it's not a sane state to be in. Note that we still
+                // have to be careful about cleaning up the removed list before.
+                if (script.lastModified() > System.currentTimeMillis()) {
+                    __log.warn("The script file timestamp is in the future compared to the current time, it " +
+                            "won't be deployed until you update it: " + script);
+                    break;
+                }
+
                 if (scriptCbps > 0) {
                     if (oldies == scriptCbps) newer.add(script);
                     else if (firstRun) toActivate.add(script);
