@@ -87,10 +87,7 @@ public class ScriptBasedStore extends EmbeddedStore {
                         e.printStackTrace();
                     }
                 } catch (Throwable t) {
-                    if (t instanceof CompilationException)
-                        __log.info(t.getMessage() + "Deployment aborted.\n");
-                    else
-                        __log.error("Unexpected error during compilation.", t);
+                    __log.error("Unexpected error during compilation.", t);
                 } finally {
                     firstRun = false;
                 }
@@ -142,7 +139,8 @@ public class ScriptBasedStore extends EmbeddedStore {
             for (File p : newer) {
                 __log.debug("Recompiling " + p);
                 ProcessModel oprocess = compileProcess(p, cbps);
-                __log.info("Process " + oprocess.getQName().getLocalPart()  + " deployed successfully.\n");
+                if (oprocess != null)
+                    __log.info("Process " + oprocess.getQName().getLocalPart()  + " deployed successfully.\n");
             }
 
             for (File p : toActivate) {
@@ -164,28 +162,33 @@ public class ScriptBasedStore extends EmbeddedStore {
         }
 
         private ProcessModel compileProcess(File pfile, List<File> cbps) throws IOException, CompilationException {
-            String radical = noExt(relativePath(_scriptsDir, pfile));
-            int version = findNextVersion(cbps, radical);
+            try {
+                String radical = noExt(relativePath(_scriptsDir, pfile));
+                int version = findNextVersion(cbps, radical);
 
-            File targetCbp = new File(_workDir, radical + "-" + version + ".cbp");
-            targetCbp.getParentFile().mkdirs();
+                File targetCbp = new File(_workDir, radical + "-" + version + ".cbp");
+                targetCbp.getParentFile().mkdirs();
 
-            FileOutputStream cbpFos = new FileOutputStream(targetCbp, false);
-            Descriptor desc = new Descriptor();
-            ProcessModel oprocess = _compiler.compileProcess(pfile, desc);
-            Serializer ser = new Serializer();
-            ser.writePModel(oprocess, cbpFos);
-            cbpFos.close();
+                FileOutputStream cbpFos = new FileOutputStream(targetCbp, false);
+                Descriptor desc = new Descriptor();
+                ProcessModel oprocess = _compiler.compileProcess(pfile, desc);
+                Serializer ser = new Serializer();
+                ser.writePModel(oprocess, cbpFos);
+                cbpFos.close();
 
-            QName pid = toPid(oprocess.getQName(), version);
-            EmbeddedProcessConf conf = new EmbeddedProcessConf(pid, oprocess, desc);
-            conf.setBaseURI(pfile.toURI());
-            _processes.put(pid, conf);
+                QName pid = toPid(oprocess.getQName(), version);
+                EmbeddedProcessConf conf = new EmbeddedProcessConf(pid, oprocess, desc);
+                conf.setBaseURI(pfile.toURI());
+                _processes.put(pid, conf);
 
-            fireEvent(new ProcessStoreEvent(ProcessStoreEvent.Type.DEPLOYED, pid, null));
-            fireEvent(new ProcessStoreEvent(ProcessStoreEvent.Type.ACTIVATED, pid, null));
+                fireEvent(new ProcessStoreEvent(ProcessStoreEvent.Type.DEPLOYED, pid, null));
+                fireEvent(new ProcessStoreEvent(ProcessStoreEvent.Type.ACTIVATED, pid, null));
 
-            return oprocess;
+                return oprocess;
+            } catch (CompilationException ce) {
+                __log.info(ce.getMessage() + "Deployment of file " + pfile + " aborted.\n");
+                return null;
+            }
         }
 
         private void reloadProcess(File pfile, List<File> cbps) throws IOException, CompilationException {
