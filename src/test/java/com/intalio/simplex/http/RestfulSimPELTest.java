@@ -46,7 +46,6 @@ public class RestfulSimPELTest extends TestCase {
     }
 
     private static final String HELLO_WORLD =
-            "processConfig.inMem = true;\n" +
             "processConfig.address = \"/hello\";\n" +
 
             "process HelloWorld { \n" +
@@ -74,7 +73,6 @@ public class RestfulSimPELTest extends TestCase {
     }
 
     private static final String COUNTER =
-            "processConfig.inMem = true;\n" +
             "processConfig.address = \"/counter\";\n" +
 
             "process Counter {\n" +
@@ -113,7 +111,8 @@ public class RestfulSimPELTest extends TestCase {
         ClientConfig cc = new DefaultClientConfig();
         Client c = Client.create(cc);
 
-        // Starting the counter process
+        // Starting the counter process:q
+        
         WebResource wr = c.resource("http://localhost:3434/counter"); // TODO default on process name
         ClientResponse createResponse = wr.path("/").accept("application/xml").type("application/xml")
                 .post(ClientResponse.class, "<counter>3</counter>");
@@ -172,7 +171,6 @@ public class RestfulSimPELTest extends TestCase {
     }
     
     public static final String CALLING_GET =
-            "processConfig.inMem = true;\n" +
             "processConfig.address = \"/feedget\";\n" +
 
             "var feedBUrl = \"http://feeds.feedburner.com/\"; " +
@@ -196,11 +194,10 @@ public class RestfulSimPELTest extends TestCase {
                 .post(ClientResponse.class, "<name>OffTheLip</name>");
         String response = resp.getEntity(String.class);
         System.out.println("=> " + response);
-        assertEquals(response, "Off The Lip");
+        assertEquals("Off The Lip", response);
     }
 
     public static final String GET_PUT_POST_DELETE =
-            "processConfig.inMem = true;\n" +
             "processConfig.address = \"/gppdproc\";\n" +
 
             "var testRoot = \"http://localhost:3434/gppd\"; " +
@@ -272,7 +269,6 @@ public class RestfulSimPELTest extends TestCase {
     }
 
     private static final String HELLO_FORM_WORLD =
-            "processConfig.inMem = true;\n" +
             "processConfig.address = \"/hello-form\";\n" +
 
             "process HelloFormWorld { \n" +
@@ -300,7 +296,6 @@ public class RestfulSimPELTest extends TestCase {
     }
 
     private static final String SUB_URL_PROCESS =
-            "processConfig.inMem = true;\n" +
             "processConfig.address = \"/sub/address/hello-form\";\n" +
 
             "process HelloFormWorld { \n" +
@@ -328,7 +323,6 @@ public class RestfulSimPELTest extends TestCase {
     }
 
     public static final String REQUEST_NO_OUTPUT =
-            "processConfig.inMem = true;\n" +
             "processConfig.address = \"/noout\";\n" +
 
             "var testRoot = \"http://localhost:3434/post201\"; " +
@@ -357,7 +351,6 @@ public class RestfulSimPELTest extends TestCase {
     }
 
     public static final String PARAMETERIZED_POST =
-            "processConfig.inMem = true;\n" +
             "processConfig.address = \"/parampost\";\n" +
 
             "var testRoot = \"http://localhost:3434/post201\"; " +
@@ -493,7 +486,7 @@ public class RestfulSimPELTest extends TestCase {
             "   }\n" +
             "}";
 
-    // Tests that a resource that's only used in expressions can be manipulater
+    // Tests that a resource that's only used in expressions can be manipulated
     public void testUnusedResource() throws Exception {
         server.start();
         server.deploy(UNUSED_RES);
@@ -540,8 +533,8 @@ public class RestfulSimPELTest extends TestCase {
         assertTrue(resp.getStatus() == 201);
 
         String response = resp.getEntity(String.class);
-        assertTrue(response.indexOf("<text>GET</text>") > 0);
         System.out.println("=> " + response);
+        assertTrue(response.indexOf("GET</text>") > 0);
     }
 
     public static final String RESOURCE_IN_WHILE =
