@@ -1,4 +1,3 @@
-processConfig.inMem = true;
 processConfig.address = "/api/mock/email";
 
 function printEmailInfo(email) {
