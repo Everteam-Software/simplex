@@ -31,7 +31,11 @@ COMMONS             = struct(
   :logging          =>"commons-logging:commons-logging:jar:1.1",
   :primitives       =>"commons-primitives:commons-primitives:jar:1.0"
 )
+DOM4J               = "dom4j:dom4j:jar:1.6.1"
 H2                  = "com.h2database:h2:jar:1.1.111"
+HIBERNATE           = [ "org.hibernate:hibernate:jar:3.2.5.ga",
+                        "antlr:antlr:jar:2.7.6", "cglib:cglib-nodep:jar:2.1_3", "net.sf.ehcache:ehcache:jar:1.2.3" ]
+
 JAVAX               = struct(
   :transaction      =>"org.apache.geronimo.specs:geronimo-jta_1.1_spec:jar:1.1",
 #  :resource         =>"org.apache.geronimo.specs:geronimo-j2ee-connector_1.5_spec:jar:1.0",
@@ -41,10 +45,10 @@ JAVAX               = struct(
 JERSEY              = group("jersey-server", "jersey-client", "jersey-core", :under=>"com.sun.jersey", :version=>"1.0.1")
 JETTY               = group("jetty", "jetty-util", "servlet-api-2.5", :under=>"org.mortbay.jetty", :version=>"6.1.11")
 LOG4J               = "log4j:log4j:jar:1.2.15"
-ODE                 = group("ode-bpel-api", "ode-bpel-compiler", "ode-bpel-dao", "ode-dao-jpa", 
+ODE                 = group("ode-bpel-api", "ode-bpel-compiler", "ode-bpel-dao", "ode-dao-hibernate", 
                             "ode-runtimes", "ode-engine", "ode-il-common", "ode-jacob", 
                             "ode-scheduler-simple", "ode-utils", :under=>"org.apache.ode", :version=>"2.1-SNAPSHOT")
-OPENJPA             = ["org.apache.openjpa:openjpa:jar:1.1.0",
+OPENJPA             = ["org.apache.openjpa:openjpa:jar:1.2.1",
                        "net.sourceforge.serp:serp:jar:1.13.1"]
 SIMPEL              = "com.intalio.simpel:simpel:jar:0.2-SNAPSHOT"
 SLF4J               = group(%w{ slf4j-api slf4j-log4j12 }, :under=>"org.slf4j", :version=>"1.4.3")
@@ -68,12 +72,13 @@ define "simplex" do
   local_libs = file(_("lib/e4x-grammar-0.2.jar")), file(_("lib/rhino-1.7R2pre-patched.jar")),
     file(_("lib/btm-1.3.2.jar"))
 
-  compile.with local_libs, SIMPEL, ODE, LOG4J, JAVAX.transaction, JERSEY, 
-    JAVAX.rest, JETTY, H2, WSDL4J
+  compile.with local_libs, SIMPEL, ODE, LOG4J, JAVAX.transaction, JERSEY, ASM, HIBERNATE, 
+    JAVAX.rest, JAVAX.persistence, JETTY, H2, WSDL4J, COMMONS.logging
 
-  test.with COMMONS.lang, COMMONS.logging, LOG4J, ASM, ODE, H2,
-    OPENJPA, JAVAX.persistence, SLF4J,
+  test.with COMMONS.lang, COMMONS.logging, LOG4J, ODE, H2, DOM4J,
+    HIBERNATE, JAVAX.persistence, SLF4J,
     XERCES, ANTLR_RT, local_libs, COMMONS.collections
+  test.using :fork => :each
   package :jar
 
   package(:zip, :id=>'simplex-public-html').tap do |p|
@@ -84,10 +89,14 @@ define "simplex" do
     zip.include meta_inf + ["README", "src/main/samples/"].map { |f| path_to(f) }
 
     zip.path('lib').include artifacts(SIMPEL, ODE, LOG4J, JAVAX.transaction,
-      COMMONS.lang, COMMONS.logging, LOG4J, WSDL4J, ASM, JERSEY, OPENJPA, H2,
-      JAVAX.persistence, JAVAX.rest, JETTY, SLF4J,
+      COMMONS.lang, COMMONS.logging, LOG4J, WSDL4J, JERSEY, HIBERNATE, H2, ASM,
+      JAVAX.persistence, JAVAX.rest, JETTY, SLF4J, DOM4J,
       XERCES, ANTLR_RT, local_libs, COMMONS.collections, local_libs),
       package(:zip, :id=>'simplex-public-html')
+
+    zip.path('conf').include _("src/test/resources/jndi.properties"), 
+                             _("src/main/etc/bitronix-default-config.properties"), 
+                             _("src/main/etc/database.properties")
 
     packages.each do |pkg|
       unless pkg.id =~ /intalio-simplex/

@@ -78,6 +78,7 @@ do
   LOCALCLASSPATH=$LOCALCLASSPATH:$f
 done
 LOCALCLASSPATH=$LOCALCLASSPATH:$LOG
+LOCALCLASSPATH=$LOCALCLASSPATH:$SIMPLEX_HOME/conf
 
 # For Cygwin, switch paths to Windows format before running java
 if $cygwin; then
@@ -90,4 +91,4 @@ if $cygwin; then
     LOG=`cygpath --windows "$LOG"`
 fi
 
-exec "$JAVACMD" $SIMPLEX_JAVAOPTS -Dsimplex.home="$SIMPLEX_HOME" -Djava.util.logging.config.file="$SIMPLEX_HOME/log/logging.properties" -cp "$LOCALCLASSPATH" com.intalio.simplex.StandaloneServer "$SIMPLEX_HOME" "$@"
+exec "$JAVACMD" $SIMPLEX_JAVAOPTS -Dbtm.root="$SIMPLEX_HOME" -Dsimplex.home="$SIMPLEX_HOME" -Djava.util.logging.config.file="$SIMPLEX_HOME/log/logging.properties" -cp "$LOCALCLASSPATH" com.intalio.simplex.StandaloneServer "$SIMPLEX_HOME" "$@"

@@ -30,22 +30,26 @@ import org.apache.ode.bpel.engine.BpelServerImpl;
 import org.apache.ode.bpel.engine.CountLRUDehydrationPolicy;
 import org.apache.ode.bpel.evtproc.DebugBpelEventListener;
 import org.apache.ode.bpel.iapi.*;
-import org.apache.ode.bpel.memdao.BpelDAOConnectionFactoryImpl;
 import org.apache.ode.il.dbutil.Database;
 import org.apache.ode.scheduler.simple.JdbcDelegate;
 import org.apache.ode.scheduler.simple.SimpleScheduler;
 import org.apache.ode.utils.GUID;
+import org.apache.ode.daohib.bpel.BpelDAOConnectionFactoryImpl;
+import org.hibernate.cfg.Environment;
 
 import javax.sql.DataSource;
 import javax.transaction.TransactionManager;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import java.sql.*;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.io.File;
 
 import bitronix.tm.TransactionManagerServices;
-import bitronix.tm.resource.jdbc.PoolingDataSource;
+
 
 public class ServerLifecycle {
     private static final Logger __log = Logger.getLogger(EmbeddedServer.class);
@@ -68,6 +72,11 @@ public class ServerLifecycle {
     }
 
     public void start() {
+        if (System.getProperty("btm.root") == null) {
+            File rootDir = new File(new File(getClass().getClassLoader().getResource("marker").getFile()).getParent());
+            System.setProperty("btm.root", rootDir.getAbsolutePath());
+        }
+
         __log.debug("Initializing transaction manager");
         initTxMgr();
         __log.debug("Creating data source.");
@@ -127,32 +136,66 @@ public class ServerLifecycle {
         _server.init();
     }
 
-    protected void initDAO() {
-        _daoCF = new BpelDAOConnectionFactoryImpl(_txMgr);
-    }
+//    protected void initDAO() {
+//        BPELDAOConnectionFactoryImpl daoCF = new BPELDAOConnectionFactoryImpl();
+//        daoCF.setDataSource(_ds);
+//        daoCF.setTransactionManager(_txMgr);
+//
+//        boolean createSchema = createSchedulerTables();
+//        Properties props = new Properties();
+////        props.put("openjpa.Sequence", "org.apache.openjpa.jdbc.kernel.NativeJDBCSeq");
+//        if (createSchema)
+//            props.put("openjpa.jdbc.SynchronizeMappings", "buildSchema(ForeignKeys=false)");
+//        daoCF.init(props);
+//        // Forcing EM creation to initialize the DB
+//        if (createSchema)
+//            daoCF.getEMF().createEntityManager().close();
+//        _daoCF = daoCF;
+//    }
 
-    protected void initTxMgr() {
-        _txMgr = TransactionManagerServices.getTransactionManager();
+    protected void initDAO() {
+        BpelDAOConnectionFactoryImpl daoCF = new BpelDAOConnectionFactoryImpl();
+        daoCF.setDataSource(_ds);
+        daoCF.setTransactionManager(_txMgr);
+
+        boolean createSchema = createSchedulerTables();
+        Properties props = new Properties();
+        props.put(Environment.DIALECT, "org.hibernate.dialect.H2Dialect");
+        props.put(Environment.AUTO_CLOSE_SESSION, "true");
+        props.put(Environment.FLUSH_BEFORE_COMPLETION, "true");
+        if (createSchema)
+            props.put(Environment.HBM2DDL_AUTO, "create-drop");
+        daoCF.init(props);
+        _daoCF = daoCF;
     }
 
     protected void initDataSource() {
-        PoolingDataSource btmDs = new PoolingDataSource();
-        btmDs.setClassName("org.h2.jdbcx.JdbcDataSource");
-        btmDs.setUniqueName(new GUID().toString());
-        btmDs.setMaxPoolSize(_options.getOdeProperties().getPoolMaxSize());
-        btmDs.setMinPoolSize(_options.getOdeProperties().getPoolMinSize());
-        btmDs.setAllowLocalTransactions(true);
-        btmDs.getDriverProperties().setProperty("URL", getDbUrl());
-        btmDs.getDriverProperties().setProperty("user", "sa");
-        btmDs.getDriverProperties().setProperty("password", "");
-        _ds = btmDs;
+        try {
+            InitialContext ctx = new InitialContext();
+            _ds = (DataSource) ctx.lookup("jdbc/simplexdb");
+        } catch (NamingException e) {
+            throw new RuntimeException("Could not find datasource jdbc/simplexdb.");
+        }
     }
 
-    protected String getDbUrl() {
-        return "jdbc:h2:mem:mydb;DB_CLOSE_DELAY=-1";
+    protected void initTxMgr() {
+        try {
+            InitialContext ctx = new InitialContext();
+            _txMgr = (TransactionManager) ctx.lookup("java:comp/UserTransaction");
+        } catch (NamingException e) {
+            throw new RuntimeException("Could not find transaction manager under java:comp/UserTransaction.");
+        }
     }
 
     protected Scheduler createScheduler() {
+        SimpleScheduler scheduler = new SimpleScheduler(new GUID().toString(),new JdbcDelegate(_ds), new Properties());
+        scheduler.setTransactionManager(_txMgr);
+        _scheduler = scheduler;
+        return scheduler;
+    }
+
+    protected boolean createSchedulerTables() {
+        boolean createSchema = false;
         Connection conn = null;
         Statement stmt = null;
         ResultSet result = null;
@@ -163,26 +206,38 @@ public class ServerLifecycle {
                 result = metaData.getTables("APP", null, "ODE_JOB", null);
 
                 if (!result.next()) {
+                    createSchema = true;
                     String dbProductName = metaData.getDatabaseProductName();
                     if (dbProductName.indexOf("Derby") >= 0) {
                         stmt = conn.createStatement();
                         stmt.execute(DERBY_SCHEDULER_DDL1);
                         stmt.close();
                         stmt = conn.createStatement();
-                        stmt.execute(DERBY_SCHEDULER_DDL2);
+                        stmt.execute(GENERIC_SCHEDULER_DDL2);
                         stmt.close();
                         stmt = conn.createStatement();
-                        stmt.execute(DERBY_SCHEDULER_DDL3);
+                        stmt.execute(GENERIC_SCHEDULER_DDL3);
                         stmt.close();
-                    }
-                    if (dbProductName.indexOf("HSQL") >= 0 || dbProductName.indexOf("H2") >= 0) {
+                    } else if (dbProductName.indexOf("HSQL") >= 0 || dbProductName.indexOf("H2") >= 0) {
                         stmt = conn.createStatement();
                         stmt.execute(HSQL_SCHEDULER_DDL);
+                    } else if (dbProductName.indexOf("MySQL") >= 0) {
+                        stmt = conn.createStatement();
+                        stmt.execute(MYSQL_SCHEDULER_DDL);
+                        stmt.close();
+                        stmt = conn.createStatement();
+                        stmt.execute(GENERIC_SCHEDULER_DDL2);
+                        stmt.close();
+                        stmt = conn.createStatement();
+                        stmt.execute(GENERIC_SCHEDULER_DDL3);
                     }
+//                    stmt = conn.createStatement();
+//                    stmt.execute(JPA_SEQ);
                 }
             }
 
         } catch (SQLException e) {
+            createSchema = false;
             // Swallowing it, either it already exists in which case we don't care or
             // creation failed and we'll find out soon enough
         } finally {
@@ -194,11 +249,7 @@ public class ServerLifecycle {
                 __log.info(se);
             }
         }
-
-        SimpleScheduler scheduler = new SimpleScheduler(new GUID().toString(),new JdbcDelegate(_ds), new Properties());
-        scheduler.setTransactionManager(_txMgr);
-        _scheduler = scheduler;
-        return scheduler;
+        return createSchema;
     }
 
     protected void initProcessStore() {
@@ -277,6 +328,17 @@ public class ServerLifecycle {
                     " PRIMARY KEY(jobid));\n" +
                     "CREATE INDEX IDX_ODE_JOB_TS ON ODE_JOB (ts);\n" +
                     "CREATE INDEX IDX_ODE_JOB_NODEID ON ODE_JOB (nodeid);\n";
+//                    "CREATE SEQUENCE IF NOT EXISTS OPENJPA_SEQUENCE;\n";
+
+    private static final String MYSQL_SCHEDULER_DDL =
+            "CREATE TABLE ODE_JOB (" +
+                    " jobid CHAR(64) DEFAULT '' NOT NULL," +
+                    " ts BIGINT DEFAULT 0 NOT NULL ," +
+                    " nodeid char(64)  NULL," +
+                    " scheduled int DEFAULT 0 NOT NULL," +
+                    " transacted int DEFAULT 0 NOT NULL," +
+                    " details BLOB(4096) NULL," +
+                    " PRIMARY KEY(jobid));\n";
 
     private static final String DERBY_SCHEDULER_DDL1 =
             "CREATE TABLE ODE_JOB (" +
@@ -287,7 +349,9 @@ public class ServerLifecycle {
                     " transacted int DEFAULT 0 NOT NULL," +
                     " details BLOB(50K)," +
                     " PRIMARY KEY (jobid))";
-    private static final String DERBY_SCHEDULER_DDL2 = "CREATE INDEX IDX_ODE_JOB_TS ON ODE_JOB (ts)";
-    private static final String DERBY_SCHEDULER_DDL3 = "CREATE INDEX IDX_ODE_JOB_NODEID ON ODE_JOB (nodeid)";
+    private static final String GENERIC_SCHEDULER_DDL2 = "CREATE INDEX IDX_ODE_JOB_TS ON ODE_JOB (ts)";
+    private static final String GENERIC_SCHEDULER_DDL3 = "CREATE INDEX IDX_ODE_JOB_NODEID ON ODE_JOB (nodeid)";
+
+    private static final String JPA_SEQ = "CREATE TABLE OPENJPA_SEQUENCE_TABLE (ID SMALLINT NOT NULL, SEQUENCE_VALUE BIGINT, PRIMARY KEY (ID));";
 
 }

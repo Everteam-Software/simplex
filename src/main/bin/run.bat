@@ -21,7 +21,9 @@ set LOCALCLASSPATH=%SIMPLEX_CLASSPATH%;%SIMPLEX_LIB%
 FOR %%c in (%SIMPLEX_LIB%\*.jar) DO (call :append_cp %%c)
 call :append_cp %SIMPLEX_LOG%
 
-%JAVACMD% %SIMPLEX_JAVAOPTS% -Dsimplex.home="%SIMPLEX_HOME%" -Djava.util.logging.config.file="%SIMPLEX_HOME%/log/logging.properties" -cp "%LOCALCLASSPATH%" com.intalio.simplex.StandaloneServer "%SIMPLEX_HOME%"  %* 
+set LOCALCLASSPATH=%LOCALCLASSPATH%;"%SIMPLEX_HOME%/conf"
+
+%JAVACMD% %SIMPLEX_JAVAOPTS% -Dbtm.root="%SIMPLEX_HOME%" -Dsimplex.home="%SIMPLEX_HOME%" -Djava.util.logging.config.file="%SIMPLEX_HOME%/log/logging.properties" -cp "%LOCALCLASSPATH%" com.intalio.simplex.StandaloneServer "%SIMPLEX_HOME%"  %* 
 goto end
 
 :append_cp

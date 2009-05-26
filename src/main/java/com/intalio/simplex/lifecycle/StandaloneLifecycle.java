@@ -21,16 +21,17 @@ package com.intalio.simplex.lifecycle;
 import com.intalio.simplex.Options;
 import com.intalio.simplex.embed.ServerLifecycle;
 import org.apache.log4j.Logger;
-import org.apache.ode.il.config.OdeConfigProperties;
-import org.apache.ode.il.dbutil.Database;
-import org.apache.ode.utils.GUID;
+import org.apache.ode.utils.LoggingInterceptor;
+import org.apache.commons.logging.LogFactory;
 
 import java.io.*;
-import java.util.Properties;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import bitronix.tm.resource.jdbc.PoolingDataSource;
+import javax.sql.DataSource;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.transaction.TransactionManager;
 
 public class StandaloneLifecycle extends ServerLifecycle {
     
@@ -38,7 +39,6 @@ public class StandaloneLifecycle extends ServerLifecycle {
 
     protected File _scriptsDir;
     protected File _workDir;
-    protected File _derbyDir;
     protected File _libDir;
 
     public StandaloneLifecycle(File serverRoot, Options options) {
@@ -52,16 +52,8 @@ public class StandaloneLifecycle extends ServerLifecycle {
         _workDir = sysWorkDir != null ? new File(sysWorkDir) : new File(serverRoot, "work");
         if (!_workDir.exists()) _workDir.mkdirs();
 
-        String sysDerbyDir = System.getProperty("simplex.db.dir");
-        _derbyDir = sysDerbyDir != null ? new File(sysDerbyDir) : new File(_workDir, "db");
-
         _libDir = new File(serverRoot, "lib");
         unzipPublicHtml();
-    }
-
-    @Override
-    protected String getDbUrl() {
-        return "jdbc:h2:" + _workDir.getAbsolutePath() + "/simplexdb";
     }
 
     protected void initProcessStore() {
