@@ -139,25 +139,25 @@ public class ProcessWebResource {
     @POST
     @Consumes("application/xml") @Produces("application/xml")
     public Response post(String content) {
+        Element msgElmt = null;
         try {
-            Element msgElmt = null;
             if (content.length() > 0) msgElmt = DOMUtils.stringToDOM(content);
-            return post(msgElmt, FEJOML.XML);
         } catch (Exception e) {
             return Response.status(400).entity("Couldn't parse XML request.").type("text/plain").build();
         }
+        return post(msgElmt, FEJOML.XML);
     }
 
     @POST @Path("{sub : .*}")
     @Consumes("application/xml") @Produces("application/xml")
     public Response postSub(String content) {
+        Element msgElmt = null;
         try {
-            Element msgElmt = null;
             if (content.length() > 0) msgElmt = DOMUtils.stringToDOM(content);
-            return post(msgElmt, FEJOML.XML);
         } catch (Exception e) {
             return Response.status(400).entity("Couldn't parse XML request.").type("text/plain").build();
         }
+        return post(msgElmt, FEJOML.XML);
     }
 
     @POST

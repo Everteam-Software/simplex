@@ -33,6 +33,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.ode.bpel.iapi.Resource;
+import org.apache.log4j.Logger;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.HandlerList;
@@ -50,6 +51,8 @@ import com.sun.jersey.spi.container.servlet.ServletContainer;
 
 @Path("/")
 public class EngineWebResource {
+
+    private static final Logger __log = Logger.getLogger(EngineWebResource.class);
 
     private static Server _server;
     private static ServerLifecycle _serverLifecyle;
@@ -90,6 +93,8 @@ public class EngineWebResource {
     }
 
     public static void registerResource(Resource resource) {
+        if (__log.isDebugEnabled())
+            __log.debug("Registering resource " + resource.getUrl() + " / " + resource.getMethod());
         String nonSlashed = stripSlashes(resource.getUrl());
         ResourceDesc desc = _engineResources.get(new UriTemplate(nonSlashed));
         if (desc == null) {
