@@ -160,7 +160,6 @@ public class ServerLifecycle {
 
         boolean createSchema = createSchedulerTables();
         Properties props = new Properties();
-        props.put(Environment.DIALECT, "org.hibernate.dialect.H2Dialect");
         props.put(Environment.AUTO_CLOSE_SESSION, "true");
         props.put(Environment.FLUSH_BEFORE_COMPLETION, "true");
         if (createSchema)
