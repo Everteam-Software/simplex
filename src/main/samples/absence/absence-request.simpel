@@ -1,7 +1,7 @@
 processConfig.inMem = false;
 processConfig.address = "/absence";
 
-shotBase = "http://localhost:3000";
+shotBase = "http://localhost:3434/singleshot";
 myBase = "http://localhost:3434";
 
 function addHeaders(login, password, req) {
@@ -23,17 +23,17 @@ function buildAbsenceRequest(login, password, assignee, callback, from, to) {
   task = <task><title>Leave of absence request</title>
             <description>Leave of absence request</description>
             <owner>{assignee}</owner>
-            <webhooks type="array"><webhook><event>completed</event><url>{callback}</url></webhook></webhooks>
+            <webhooks type="array"><webhook><event>completed</event><url>{callback}</url><enctype>application/xml</enctype></webhook></webhooks>
             <form><html>{formHtml}</html></form>
          </task>;
   return addHeaders(login, password, task);
 }
 
-function buildConfirmation(login, password, assignee, result, from, to) {
-  task = <task><title>Absence request response</title>
-            <description>Your absence request from {from} to {to} has been {result}.</description>
-            <owner>{assignee}</owner>
-         </task>;
+function buildNotification(login, password, assignee, result, from, to) {
+  task = <notification><subject>Absence request response</subject>
+            <body>Your absence request from {from} to {to} has been {result}.</body>
+            <recipients><recipient>{assignee}</recipient></recipients>
+         </notification>;
   return addHeaders(login, password, task);
 }
 
@@ -41,34 +41,31 @@ process TaskCreator {
   callback = resource("/callback");
   
   receive(self) { |s|
-    leave = buildAbsenceRequest("mriou", "secret", "bond", 
-      myBase + callback, "Sun, 5 Apr 09", "Sun, 12 Apr 09");
+    leave = buildAbsenceRequest("singleshot", "secret", "bond", 
+      myBase + callback, s.data.from, s.data.to);
     resp = request(shotBase + "/tasks", "POST", leave);
-    taskLoc = resp.headers.Location;
+    print("### waiting for callback for " + resp.headers.Location);
+
     reply(resp);
   }
-  print("### waiting for callback for " + taskLoc);
 
+  updatedTask = <task/>;
   receive(callback) { |msg|
     print("### callback received!! " + msg);
+    updatedTask = msg;
     reply();
   }
 
-  // Getting the task data
-
-  taskReq = <placeholder/>;
-  taskReq = addHeaders("mriou", "secret", taskReq);
-  updatedTask = request(taskLoc + ".xml", "GET", taskReq);
   if (updatedTask.data.accept == "true") {
-    print("### Absence request accepted" + updatedTask.data.from);
+    print("### Absence request accepted " + updatedTask.data.from);
     status = "accepted";
   } else {
     print("### Absence request refused");
     status = "refused";
   }
 
-  confirmation = buildConfirmation("mriou", "secret", "mriou", 
+  confirmation = buildNotification("singleshot", "secret", "singleshot", 
     status, updatedTask.data.from.text() , updatedTask.data.to.text());
-  request(shotBase + "/tasks", "POST", confirmation);
+  request(shotBase + "/notifications", "POST", confirmation);
 }
 
