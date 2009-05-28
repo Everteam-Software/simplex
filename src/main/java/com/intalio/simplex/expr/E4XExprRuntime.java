@@ -239,7 +239,7 @@ public class E4XExprRuntime implements ExpressionLanguageRuntime {
                 // public method allowing an XML construction.
                 String[] newXmlArr = new String[xmlArr.length - 1];
                 System.arraycopy(xmlArr, 1, newXmlArr, 0, xmlArr.length - 1);
-                Object xmlObj = _cx.evaluateString(start, join(newXmlArr, "\n") , "<expr>", 0, null);
+                Object xmlObj = _cx.evaluateString(start, escapeE4X(join(newXmlArr, "\n")), "<expr>", 0, null);
                 _env.put(name, xmlObj);
                 return xmlObj;
             } catch (Exception e) {
@@ -301,6 +301,10 @@ public class E4XExprRuntime implements ExpressionLanguageRuntime {
             parentScope = new JSTopLevel(cx, evaluationContext.getBaseResourceURI().getPath());
         }
         return parentScope;
+    }
+
+    public static String escapeE4X(String xmlstr) {
+        return xmlstr.replaceAll("\\{", "&#x7B;").replaceAll("\\}", "&#x7D;");
     }
 
     // Can someone tell me why I have to implement this? The Java API just sucks.
