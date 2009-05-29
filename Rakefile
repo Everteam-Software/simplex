@@ -45,11 +45,13 @@ JAVAX               = struct(
 JERSEY              = group("jersey-server", "jersey-client", "jersey-core", :under=>"com.sun.jersey", :version=>"1.0.1")
 JETTY               = group("jetty", "jetty-util", "servlet-api-2.5", :under=>"org.mortbay.jetty", :version=>"6.1.11")
 LOG4J               = "log4j:log4j:jar:1.2.15"
+MYSQL               = "mysql:mysql-connector:jar:5.0.4"
 ODE                 = group("ode-bpel-api", "ode-bpel-compiler", "ode-bpel-dao", "ode-dao-hibernate", 
                             "ode-runtimes", "ode-engine", "ode-il-common", "ode-jacob", 
                             "ode-scheduler-simple", "ode-utils", :under=>"org.apache.ode", :version=>"2.1-SNAPSHOT")
 OPENJPA             = ["org.apache.openjpa:openjpa:jar:1.2.1",
                        "net.sourceforge.serp:serp:jar:1.13.1"]
+SINGLESHOT          = "com.intalio.singleshot:singleshot:war:20090529"
 SIMPEL              = "com.intalio.simpel:simpel:jar:0.2-SNAPSHOT"
 SLF4J               = group(%w{ slf4j-api slf4j-log4j12 }, :under=>"org.slf4j", :version=>"1.4.3")
 WSDL4J              = "wsdl4j:wsdl4j:jar:1.6.2"
@@ -85,7 +87,7 @@ define "simplex" do
     p.include _("src/main/public_html/")
   end
 
-  package(:zip, :id=>'intalio-simplex').path("intalio-#{id}-#{version}").tap do |zip|
+  zip_includes = lambda do |zip|
     zip.include meta_inf + ["README", "src/main/samples/"].map { |f| path_to(f) }
 
     zip.path('lib').include artifacts(SIMPEL, ODE, LOG4J, JAVAX.transaction,
@@ -95,11 +97,10 @@ define "simplex" do
       package(:zip, :id=>'simplex-public-html')
 
     zip.path('conf').include _("src/test/resources/jndi.properties"), 
-                             _("src/main/etc/bitronix-default-config.properties"), 
-                             _("src/main/etc/database.properties")
+                             _("src/main/etc/bitronix-default-config.properties")
 
     packages.each do |pkg|
-      unless pkg.id =~ /intalio-simplex/
+      unless pkg.id =~ /intalio/
         zip.include(pkg.to_s, :path=>'lib')
       end
     end
@@ -107,5 +108,25 @@ define "simplex" do
     zip.path('bin').include _('src/main/bin/run'), _('src/main/bin/run.bat')
     zip.path('log').include _('src/main/etc/log4j.properties'), _('src/main/etc/logging.properties')
   end
+
+  package(:zip, :id=>'intalio-simplex').path("intalio-#{id}-#{version}").tap do |zip|
+    zip_includes[zip]
+    zip.path('conf').include _("src/main/etc/database.properties")
+  end
+
+  DE_VERSION = 0.1
+  package(:zip, {:id=>'intalio-de', :version=>DE_VERSION}).path("intalio-de-#{DE_VERSION}").tap do |zip|
+    zip_includes[zip]
+    zip.path('conf').include(_("src/main/etc/database.mysql.properties"), :as =>'database.properties')
+    zip.path('conf').include(_('target/mysql_schema.sql'))
+    zip.path('lib').include artifacts(MYSQL)
+    zip.path('webapps/singleshot').merge(artifacts(SINGLESHOT))
+  end
+  package(:zip, {:id=>'intalio-de', :version=>DE_VERSION}).enhance([task do
+    File.open(_('target/mysql_schema.sql'), 'w') do |f| 
+      f << File.read(_("src/main/etc/ode_schema.sql"))
+      f << File.read(_("src/main/etc/singleshot_schema.sql"))
+    end
+  end])
 end
 
