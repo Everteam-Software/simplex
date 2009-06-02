@@ -136,8 +136,7 @@ CREATE TABLE `webhooks` (
   `http_method` varchar(255) NOT NULL,
   `enctype` varchar(255) NOT NULL,
   `hmac_key` varchar(255) default NULL,
-  PRIMARY KEY  (`id`),
-  UNIQUE KEY `index_webhooks_on_task_id` (`task_id`)
+  PRIMARY KEY  (`id`)
 ) ENGINE=InnoDB;
 
 insert into webhooks (task_id, event, url, http_method, enctype) values (14, 'completed', 'http://localhost:3434/absence', 'post', 'application/xml');
