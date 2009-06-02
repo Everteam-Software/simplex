@@ -1,8 +1,8 @@
-processConfig.inMem = false;
 processConfig.address = "/absence";
 
 shotBase = "http://localhost:3434/singleshot";
 myBase = "http://localhost:3434";
+var passwd = "secret";
 
 function addHeaders(login, password, req) {
   req.headers.basicAuth.login = login;
@@ -37,12 +37,12 @@ function buildNotification(login, password, assignee, result, from, to) {
   return addHeaders(login, password, task);
 }
 
-process TaskCreator { 
+process AbsenceRequest { 
   callback = resource("/callback");
   
-  receive(self) { |s|
-    leave = buildAbsenceRequest("singleshot", "secret", "bond", 
-      myBase + callback, s.data.from, s.data.to);
+  receive(self) { |t|
+    leave = buildAbsenceRequest("singleshot", passwd, "bond", 
+      myBase + callback, t.data.from, t.data.to);
     resp = request(shotBase + "/tasks", "POST", leave);
     print("### waiting for callback for " + resp.headers.Location);
 
@@ -51,20 +51,17 @@ process TaskCreator {
 
   updatedTask = <task/>;
   receive(callback) { |msg|
-    print("### callback received!! " + msg);
     updatedTask = msg;
     reply();
   }
 
   if (updatedTask.data.accept == "true") {
-    print("### Absence request accepted " + updatedTask.data.from);
     status = "accepted";
   } else {
-    print("### Absence request refused");
     status = "refused";
   }
 
-  confirmation = buildNotification("singleshot", "secret", "singleshot", 
+  confirmation = buildNotification("singleshot", passwd, "singleshot", 
     status, updatedTask.data.from.text() , updatedTask.data.to.text());
   request(shotBase + "/notifications", "POST", confirmation);
 }
