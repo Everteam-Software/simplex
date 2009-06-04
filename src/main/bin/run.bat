@@ -8,6 +8,7 @@ set command=%0
 set progname=%~n0
 
 set SIMPLEX_HOME=%~dp0..
+set JETTY_HOME=%~dp0..
 set SIMPLEX_BIN=%~dp0..\bin
 set SIMPLEX_LIB=%~dp0..\lib
 set SIMPLEX_LOG=%~dp0..\log

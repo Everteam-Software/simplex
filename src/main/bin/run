@@ -38,6 +38,7 @@ if $cygwin ; then
 fi
 
 SIMPLEX_HOME=`cd "$SIMPLEX_BIN/.." && pwd`
+JETTY_HOME="$SIMPLEX_HOME"
 LIB="$SIMPLEX_HOME/lib"
 LOG="$SIMPLEX_HOME/log"
 
