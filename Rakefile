@@ -52,7 +52,7 @@ ODE                 = group("ode-bpel-api", "ode-bpel-compiler", "ode-bpel-dao",
 OPENJPA             = ["org.apache.openjpa:openjpa:jar:1.2.1",
                        "net.sourceforge.serp:serp:jar:1.13.1"]
 SINGLESHOT          = "com.intalio.singleshot:singleshot:war:20090602"
-SIMPEL              = "com.intalio.simpel:simpel:jar:0.2-SNAPSHOT"
+SIMPEL              = "com.intalio.simpel:simpel:jar:0.2"
 SLF4J               = group(%w{ slf4j-api slf4j-log4j12 }, :under=>"org.slf4j", :version=>"1.4.3")
 WSDL4J              = "wsdl4j:wsdl4j:jar:1.6.2"
 XERCES              = "xerces:xercesImpl:jar:2.8.1"
