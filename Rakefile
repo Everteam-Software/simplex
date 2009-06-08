@@ -34,7 +34,7 @@ COMMONS             = struct(
 DOM4J               = "dom4j:dom4j:jar:1.6.1"
 H2                  = "com.h2database:h2:jar:1.1.111"
 HIBERNATE           = [ "org.hibernate:hibernate:jar:3.2.5.ga",
-                        "antlr:antlr:jar:2.7.6", "cglib:cglib-nodep:jar:2.1_3", "net.sf.ehcache:ehcache:jar:1.2.3" ]
+                        "antlr:antlr:jar:2.7.6", "cglib:cglib-nodep:jar:2.1_3"]
 
 JAVAX               = struct(
   :transaction      =>"org.apache.geronimo.specs:geronimo-jta_1.1_spec:jar:1.1",
