@@ -48,9 +48,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.io.File;
 
-import bitronix.tm.TransactionManagerServices;
-
-
 public class ServerLifecycle {
     private static final Logger __log = Logger.getLogger(EmbeddedServer.class);
 
