@@ -45,7 +45,7 @@ JAVAX               = struct(
 JERSEY              = group("jersey-server", "jersey-client", "jersey-core", :under=>"com.sun.jersey", :version=>"1.0.1")
 JETTY               = group("jetty", "jetty-util", "servlet-api-2.5", :under=>"org.mortbay.jetty", :version=>"6.1.11")
 LOG4J               = "log4j:log4j:jar:1.2.15"
-MYSQL               = "mysql:mysql-connector:jar:5.0.4"
+MYSQL               = "mysql:mysql-connector-java:jar:5.0.4"
 ODE                 = group("ode-bpel-api", "ode-bpel-compiler", "ode-bpel-dao", "ode-dao-hibernate", 
                             "ode-runtimes", "ode-engine", "ode-il-common", "ode-jacob", 
                             "ode-scheduler-simple", "ode-utils", :under=>"org.apache.ode", :version=>"20090602")
