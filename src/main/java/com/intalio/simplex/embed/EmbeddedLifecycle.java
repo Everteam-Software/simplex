@@ -48,7 +48,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.io.File;
 
-public class ServerLifecycle {
+public class EmbeddedLifecycle {
     private static final Logger __log = Logger.getLogger(EmbeddedServer.class);
 
     protected Options _options;
@@ -62,14 +62,14 @@ public class ServerLifecycle {
     protected EmbeddedStore _store;
     protected EngineWebResource _webEngine;
 
-    public ServerLifecycle(Options options) {
+    public EmbeddedLifecycle(Options options) {
         _options = options;
         if (_options.getThreadPoolMaxSize() <= 0) _executorService = Executors.newCachedThreadPool();
         else _executorService = Executors.newFixedThreadPool(_options.getThreadPoolMaxSize());
     }
 
     public void start() {
-        if (System.getProperty("btm.root") == null) {
+        if (System.getProperty("btm.root") == null && getClass().getClassLoader().getResource("marker") != null) {
             File rootDir = new File(new File(getClass().getClassLoader().getResource("marker").getFile()).getParent());
             System.setProperty("btm.root", rootDir.getAbsolutePath());
         }
@@ -98,7 +98,6 @@ public class ServerLifecycle {
 
     public void clean() {
         if (_store != null) _store.stop();
-        EngineWebResource.stopRestfulServer();
         if (_db != null) _db.shutdown();
         _db = null;
         _server = null;
@@ -168,18 +167,18 @@ public class ServerLifecycle {
     protected void initDataSource() {
         try {
             InitialContext ctx = new InitialContext();
-            _ds = (DataSource) ctx.lookup("jdbc/simplexdb");
+            _ds = (DataSource) ctx.lookup(_options.getDatasource());
         } catch (NamingException e) {
-            throw new RuntimeException("Could not find datasource jdbc/simplexdb.");
+            throw new RuntimeException("Could not find datasource " + _options.getDatasource(), e);
         }
     }
 
     protected void initTxMgr() {
         try {
             InitialContext ctx = new InitialContext();
-            _txMgr = (TransactionManager) ctx.lookup("java:comp/UserTransaction");
+            _txMgr = (TransactionManager) ctx.lookup(_options.getTransactionManager());
         } catch (NamingException e) {
-            throw new RuntimeException("Could not find transaction manager under java:comp/UserTransaction.");
+            throw new RuntimeException("Could not find transaction manager under java:comp/UserTransaction.", e);
         }
     }
 
@@ -253,8 +252,8 @@ public class ServerLifecycle {
         _store.registerListener(new ProcessStoreListenerImpl());
     }
 
-    private void initRestfulServer() {
-        EngineWebResource.startRestfulServer(this);
+    protected void initRestfulServer() {
+        EngineWebResource.setupRestfulServer(this);
         AdminWebResource.init(_store);
     }
     

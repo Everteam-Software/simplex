@@ -24,6 +24,7 @@ import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
 import com.intalio.simplex.EmbeddedServer;
+import com.intalio.simplex.lifecycle.WebServer;
 import junit.framework.TestCase;
 
 import java.util.regex.Matcher;
@@ -32,17 +33,21 @@ import java.util.regex.Pattern;
 public class RestfulSimPELTest extends TestCase {
 
     EmbeddedServer server;
+    WebServer _webServer;
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
         server = new EmbeddedServer();
+        _webServer = new WebServer();
+        _webServer.start();
     }
 
     @Override
     protected void tearDown() throws Exception {
         super.tearDown();
         server.stop();
+        _webServer.stop();
     }
 
     private static final String HELLO_WORLD =

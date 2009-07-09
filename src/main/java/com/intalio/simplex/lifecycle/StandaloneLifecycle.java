@@ -19,27 +19,30 @@
 package com.intalio.simplex.lifecycle;
 
 import com.intalio.simplex.Options;
-import com.intalio.simplex.embed.ServerLifecycle;
+import com.intalio.simplex.embed.EmbeddedLifecycle;
+import com.sun.jersey.spi.container.servlet.ServletContainer;
 import org.apache.log4j.Logger;
-import org.apache.ode.utils.LoggingInterceptor;
-import org.apache.commons.logging.LogFactory;
+import org.mortbay.jetty.Server;
+import org.mortbay.jetty.webapp.WebAppContext;
+import org.mortbay.jetty.servlet.ServletHolder;
+import org.mortbay.jetty.servlet.ServletHandler;
+import org.mortbay.jetty.servlet.SessionHandler;
+import org.mortbay.jetty.handler.ContextHandler;
+import org.mortbay.jetty.handler.HandlerList;
+import org.mortbay.jetty.handler.ResourceHandler;
 
 import java.io.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import javax.sql.DataSource;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import javax.transaction.TransactionManager;
-
-public class StandaloneLifecycle extends ServerLifecycle {
+public class StandaloneLifecycle extends EmbeddedLifecycle {
     
     private static final Logger __log = Logger.getLogger(StandaloneLifecycle.class);
 
     protected File _scriptsDir;
     protected File _workDir;
     protected File _libDir;
+    protected WebServer _webServer;
 
     public StandaloneLifecycle(File serverRoot, Options options) {
         super(options);
@@ -56,17 +59,23 @@ public class StandaloneLifecycle extends ServerLifecycle {
         unzipPublicHtml();
     }
 
+    @Override
     protected void initProcessStore() {
         _store = new ScriptBasedStore(_scriptsDir, _workDir);
         _store.registerListener(new ProcessStoreListenerImpl());
     }
 
-    public File getScriptsDir() {
-        return _scriptsDir;
+    @Override
+    public void clean() {
+        super.clean();
+        _webServer.stop();
     }
 
-    public File getWorkDir() {
-        return _workDir;
+    @Override
+    protected void initRestfulServer() {
+        super.initRestfulServer();
+        _webServer = new WebServer(_scriptsDir, _workDir);
+        _webServer.start();
     }
 
     private void unzipPublicHtml() {

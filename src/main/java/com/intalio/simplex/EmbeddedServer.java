@@ -18,7 +18,7 @@
 package com.intalio.simplex;
 
 import com.intalio.simpel.Descriptor;
-import com.intalio.simplex.embed.ServerLifecycle;
+import com.intalio.simplex.embed.EmbeddedLifecycle;
 import org.apache.log4j.Logger;
 import org.apache.ode.bpel.iapi.InvocationStyle;
 import org.apache.ode.bpel.iapi.Message;
@@ -40,7 +40,7 @@ public class EmbeddedServer {
     private static final Logger __log = Logger.getLogger(EmbeddedServer.class);
 
     public Options options;
-    protected ServerLifecycle _resources;
+    protected EmbeddedLifecycle _resources;
 
     public EmbeddedServer() {
         this.options = new Options();
@@ -52,7 +52,7 @@ public class EmbeddedServer {
 
     public void start(Options options) {
         this.options = options;
-        _resources = new ServerLifecycle(options);
+        _resources = new EmbeddedLifecycle(options);
         _resources.start();
     }
 

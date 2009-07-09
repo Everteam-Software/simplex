@@ -32,6 +32,8 @@ public class Options {
     private OdeConfigProperties _odeProps;
     private Properties _backingProps;
     private List<BpelEventListener> _eventListeners;
+    private String _datasource = "jdbc/simplexdb";
+    private String _txMgr = "java:comp/UserTransaction";
     private boolean _enableRest = true;
 
     public Options() {
@@ -89,5 +91,21 @@ public class Options {
 
     public boolean isRestful() {
         return _enableRest;
+    }
+
+    public String getDatasource() {
+        return _datasource;
+    }
+
+    public void setDatasource(String ds) {
+        _datasource = ds;
+    }
+
+    public String getTransactionManager() {
+        return _txMgr;
+    }
+
+    public void setTransactionManager(String txm) {
+        _txMgr = txm;
     }
 }

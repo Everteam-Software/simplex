@@ -3,7 +3,8 @@ package com.intalio.simplex;
 import junit.framework.TestCase;
 import com.intalio.simpel.util.JSTopLevel;
 import com.intalio.simplex.lifecycle.ScriptBasedStore;
-import com.intalio.simplex.embed.ServerLifecycle;
+import com.intalio.simplex.lifecycle.WebServer;
+import com.intalio.simplex.embed.EmbeddedLifecycle;
 import org.mozilla.javascript.*;
 import org.mozilla.javascript.tools.ToolErrorReporter;
 
@@ -56,8 +57,9 @@ class TestServer {
     }
 }
 
-class TestLifecycle extends ServerLifecycle {
+class TestLifecycle extends EmbeddedLifecycle {
     File testRoot;
+    WebServer _webServer;
 
     public TestLifecycle() {
         super(new Options());
@@ -67,5 +69,18 @@ class TestLifecycle extends ServerLifecycle {
     protected void initProcessStore() {
         _store = new ScriptBasedStore(testRoot, testRoot);
         _store.registerListener(new ProcessStoreListenerImpl());
+    }
+
+    @Override
+    protected void initRestfulServer() {
+        super.initRestfulServer();
+        _webServer = new WebServer();
+        _webServer.start();
+    }
+
+    @Override
+    public void clean() {
+        super.clean();
+        _webServer.stop();
     }
 }

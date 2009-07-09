@@ -18,8 +18,6 @@
 
 package com.intalio.simplex.http;
 
-import java.io.File;
-import java.io.FilenameFilter;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
@@ -34,28 +32,17 @@ import javax.ws.rs.core.UriInfo;
 
 import org.apache.ode.bpel.iapi.Resource;
 import org.apache.log4j.Logger;
-import org.mortbay.jetty.Server;
-import org.mortbay.jetty.handler.ContextHandler;
-import org.mortbay.jetty.handler.HandlerList;
-import org.mortbay.jetty.handler.ResourceHandler;
-import org.mortbay.jetty.servlet.ServletHandler;
-import org.mortbay.jetty.servlet.ServletHolder;
-import org.mortbay.jetty.servlet.SessionHandler;
-import org.mortbay.jetty.webapp.WebAppContext;
 
-import com.intalio.simplex.embed.ServerLifecycle;
-import com.intalio.simplex.lifecycle.StandaloneLifecycle;
+import com.intalio.simplex.embed.EmbeddedLifecycle;
 import com.sun.jersey.api.NotFoundException;
 import com.sun.jersey.api.uri.UriTemplate;
-import com.sun.jersey.spi.container.servlet.ServletContainer;
 
 @Path("/")
 public class EngineWebResource {
 
     private static final Logger __log = Logger.getLogger(EngineWebResource.class);
 
-    private static Server _server;
-    private static ServerLifecycle _serverLifecyle;
+    private static EmbeddedLifecycle _serverLifecyle;
 
     private static ConcurrentHashMap<UriTemplate,ResourceDesc> _engineResources;
 
@@ -113,83 +100,9 @@ public class EngineWebResource {
         // TODO eventually cleanup removed resources after a while
     }
 
-    public static void startRestfulServer(ServerLifecycle serverLifecyle) {
+    public static void setupRestfulServer(EmbeddedLifecycle serverLifecyle) {
         _serverLifecyle = serverLifecyle;
         _engineResources = new ConcurrentHashMap<UriTemplate,ResourceDesc>();
-
-        _server = new Server(3434);
-        ContextHandler context = new ContextHandler("/");
-        context.setClassLoader(Thread.currentThread().getContextClassLoader());
-        _server.addHandler(context);
-
-        HandlerList handlerList = new HandlerList();
-        
-        ServletHolder sh = new ServletHolder(ServletContainer.class);
-        sh.setInitParameter("com.sun.jersey.config.property.resourceConfigClass",
-                "com.sun.jersey.api.core.PackagesResourceConfig");
-        sh.setInitParameter("com.sun.jersey.config.property.packages", "com.intalio.simplex.http");
-        ServletHandler shh = new ServletHandler();
-        shh.addServletWithMapping(sh, "/");
-        SessionHandler sessionHandler = new SessionHandler();
-        sessionHandler.setHandler(shh);
-
-        if (_serverLifecyle instanceof StandaloneLifecycle) {
-            StandaloneLifecycle standaloneLifecycle = (StandaloneLifecycle) _serverLifecyle;
-
-            // Serving  built-in public html
-            ResourceHandler phrh = new ResourceHandler();
-            File phDir = new File(standaloneLifecycle.getWorkDir(), "public_html");
-            phrh.setResourceBase(phDir.getAbsolutePath());
-            handlerList.addHandler(phrh);
-
-            // Serving files in the script directory in addition to Jersey resources
-            ResourceHandler rh = new ResourceHandler();
-            rh.setResourceBase(standaloneLifecycle.getScriptsDir().getAbsolutePath());
-            handlerList.addHandler(rh);
-            
-            // bootstrap all the war files and folders 
-            // from the webapps folder when standalone
-			//
-			FilenameFilter appFilter = new FilenameFilter() {
-				public boolean accept(File dir, String name) {
-					return name.endsWith(".war") || new File(dir+File.separator+name).isDirectory();
-				}
-			};
-			
-			String webappFolder = standaloneLifecycle.getWorkDir()+ "/../webapps";
-			File simplexHome = new File(webappFolder);
-			File[] warFiles = simplexHome.listFiles(appFilter);
-			if(warFiles!=null) {
-			    for (File warFile : warFiles) {
-    				WebAppContext webapp = new WebAppContext();
-    				String warName = warFile.getName();
-    				String appName = (warFile.isDirectory()) ? warName:warName.substring(0,warName.indexOf(".war"));
-    				webapp.setContextPath("/" + appName);
-    				webapp.setWar(warFile.getAbsolutePath());
-    				handlerList.addHandler(webapp);
-    			}    
-			}
-		}
-
-        handlerList.addHandler(sessionHandler);
-
-        context.setHandler(handlerList);
-        try {
-            _server.start();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static void stopRestfulServer() {
-        try {
-            if (_server != null) _server.stop();
-            _server = null;
-            _serverLifecyle = null;
-            _engineResources = null;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
     }
 
     public static class ResourceDesc {

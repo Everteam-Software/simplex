@@ -45,6 +45,7 @@ public class ScriptBasedStore extends EmbeddedStore {
 
     public ScriptBasedStore(File scriptsDir, File workDir) {
         _scriptsDir = scriptsDir;
+        if (!_scriptsDir.exists()) _scriptsDir.mkdirs();
         _workDir = workDir;
         _poller = new ScriptPoller();
     }
@@ -223,6 +224,8 @@ public class ScriptBasedStore extends EmbeddedStore {
             ArrayList<File> result = new ArrayList<File>();
             // Filtering the files we're interested in in the current directory
             File[] select = root.listFiles(filter);
+            if (select == null) return result;
+            
             for (File file : select) {
                 result.add(file);
             }

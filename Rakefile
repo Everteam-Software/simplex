@@ -20,11 +20,12 @@ require "buildr"
 require "buildr/antlr"
 
 # Keep this structure to allow the build system to update version numbers.
-VERSION_NUMBER = "0.3-SNAPSHOT"
+VERSION_NUMBER = "0.2.1"
 NEXT_VERSION = "0.3"
 
 ANTLR_RT            = "org.antlr:antlr-runtime:jar:3.1.1"
 ASM                 = "asm:asm:jar:3.1"
+BITRONIX            = "org.codehaus.bitronix:btm:jar:1.3.2"
 COMMONS             = struct(
   :collections      =>"commons-collections:commons-collections:jar:3.1",
   :lang             =>"commons-lang:commons-lang:jar:2.1",
@@ -32,6 +33,7 @@ COMMONS             = struct(
   :primitives       =>"commons-primitives:commons-primitives:jar:1.0"
 )
 DOM4J               = "dom4j:dom4j:jar:1.6.1"
+# GUICE               = group("guice", "guice-servlet", :under => "com.google.code.guice", :version => "2.0")
 H2                  = "com.h2database:h2:jar:1.1.111"
 HIBERNATE           = [ "org.hibernate:hibernate:jar:3.2.5.ga",
                         "antlr:antlr:jar:2.7.6", "cglib:cglib-nodep:jar:2.1_3"]
@@ -59,6 +61,7 @@ XERCES              = "xerces:xercesImpl:jar:2.8.1"
 
 repositories.remote << "http://repo1.maven.org/maven2"
 repositories.remote << "http://download.java.net/maven/2"
+# repositories.remote << "http://guice-maven.googlecode.com/svn/trunk/"
 repositories.remote << "http://www.intalio.org/public/maven2"
 
 desc "Simplex process execution server, tightly tied to SimPEL."
@@ -71,20 +74,19 @@ define "simplex" do
   manifest["Implementation-Vendor"] = "Intalio, Inc."
   meta_inf << file("NOTICE") << file("LICENSE")
 
-  local_libs = file(_("lib/e4x-grammar-0.2.jar")), file(_("lib/rhino-1.7R2pre-patched.jar")),
-    file(_("lib/btm-1.3.2.jar"))
+  local_libs = file(_("lib/e4x-grammar-0.2.jar")), file(_("lib/rhino-1.7R2pre-patched.jar"))
 
   compile.with local_libs, SIMPEL, ODE, LOG4J, JAVAX.transaction, JERSEY, ASM, HIBERNATE, 
     JAVAX.rest, JAVAX.persistence, JETTY, H2, WSDL4J, COMMONS.logging
 
-  test.with COMMONS.lang, COMMONS.logging, LOG4J, ODE, H2, DOM4J,
-    HIBERNATE, JAVAX.persistence, SLF4J,
+  test.with COMMONS.lang, COMMONS.logging, LOG4J, ODE, H2, DOM4J, # GUICE,
+    HIBERNATE, JAVAX.persistence, SLF4J, BITRONIX,
     XERCES, ANTLR_RT, local_libs, COMMONS.collections
   test.using :fork => :each
   package :jar
 
   package(:zip, :id=>'simplex-public-html').tap do |p|
-    p.include _("src/main/public_html/")
+    p.include _("src/main/webapp/")
   end
 
   zip_includes = lambda do |zip|
@@ -92,7 +94,7 @@ define "simplex" do
 
     zip.path('lib').include artifacts(SIMPEL, ODE, LOG4J, JAVAX.transaction,
       COMMONS.lang, COMMONS.logging, LOG4J, WSDL4J, JERSEY, HIBERNATE, H2, ASM,
-      JAVAX.persistence, JAVAX.rest, JETTY, SLF4J, DOM4J,
+      JAVAX.persistence, JAVAX.rest, JETTY, SLF4J, DOM4J, BITRONIX,
       XERCES, ANTLR_RT, local_libs, COMMONS.collections, local_libs),
       package(:zip, :id=>'simplex-public-html')
 
@@ -113,6 +115,11 @@ define "simplex" do
     zip_includes[zip]
     zip.path('conf').include _("src/main/etc/database.properties")
   end
+
+  package(:war).libs -= artifacts(BITRONIX, H2, JETTY, LOG4J, JAVAX.transaction)
+  package(:war).libs += artifacts(DOM4J, COMMONS.collections, COMMONS.lang, ANTLR_RT, XERCES)
+
+  # Intalio developer edition - includes Singleshot
 
   DE_VERSION = 0.1
   package(:zip, {:id=>'intalio-de', :version=>DE_VERSION}).path("intalio-de-#{DE_VERSION}").tap do |zip|

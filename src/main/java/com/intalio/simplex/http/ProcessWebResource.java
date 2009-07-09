@@ -18,7 +18,7 @@
 
 package com.intalio.simplex.http;
 
-import com.intalio.simplex.embed.ServerLifecycle;
+import com.intalio.simplex.embed.EmbeddedLifecycle;
 import com.intalio.simplex.http.datam.FEJOML;
 import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.RESTInMessageExchange;
@@ -37,11 +37,11 @@ import java.util.Map;
 public class ProcessWebResource {
 
     private EngineWebResource.ResourceDesc _resource;
-    private static ServerLifecycle _serverLifecyle;
+    private static EmbeddedLifecycle _serverLifecyle;
     private String _root;
     private HashMap<String,String> _params;
 
-    public ProcessWebResource(EngineWebResource.ResourceDesc resource, ServerLifecycle serverLifecyle,
+    public ProcessWebResource(EngineWebResource.ResourceDesc resource, EmbeddedLifecycle serverLifecyle,
                               String root, HashMap<String,String> params) {
         _resource = resource;
         _serverLifecyle = serverLifecyle;

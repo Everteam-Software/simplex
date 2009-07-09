@@ -1,0 +1,11 @@
+<?xml version="1.0"  encoding="ISO-8859-1"?>
+
+<Configure class="org.mortbay.jetty.webapp.WebAppContext">
+    <Set name="contextPath">/simplex</Set>
+    <Set name="serverClasses">
+        <Array type="java.lang.String">
+            <Item>-org.mortbay.jetty.plus.jaas.</Item>
+            <Item>org.mortbay.jetty.</Item>
+        </Array>
+    </Set>
+</Configure>
