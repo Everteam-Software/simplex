@@ -26,6 +26,8 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.io.ObjectInputStream;
 import java.io.ByteArrayInputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 /**
  * @author Matthieu Riou <mriou@apache.org>
@@ -113,6 +115,9 @@ public class E4XExprRuntime implements ExpressionLanguageRuntime {
             if (res instanceof Boolean) varType.underlyingType = OVarType.BOOLEAN_TYPE;
         }
 
+        // Produces an error if the result is a node list
+        checkNodeList(res, expr.getExpr());
+
         ArrayList<Node> resList = new ArrayList<Node>(1);
         if (res instanceof String || res instanceof Number || res instanceof Boolean) {
             Document doc = DOMUtils.newDocument();
@@ -127,8 +132,9 @@ public class E4XExprRuntime implements ExpressionLanguageRuntime {
                 if (resNode.getNodeType() == Node.ELEMENT_NODE) mergeHeaders((Element) resNode);
                 resList.add(wrapper);
             } catch (IllegalArgumentException e) {
-                // Rhino makes it pretty hard to use it sXML impl, XML and XMLList are package level
+                // Rhino makes it pretty hard to use its XML impl, XML and XMLList are package level
                 // classes so I can't test on them but toDomNode doesn't accept XMLList
+                // We get in here if the node list is a simple type, usually a string
                 Document doc = DOMUtils.newDocument();
                 resList.add(doc.createTextNode(res.toString()));
             }
@@ -161,6 +167,26 @@ public class E4XExprRuntime implements ExpressionLanguageRuntime {
         } catch (RuntimeException e) {
             if (__log.isInfoEnabled()) __log.info("Error when executing Javascript (" + expr + "): " + e.getMessage());
             throw e;
+        }
+    }
+
+    public void checkNodeList(Object res, String expr) throws FaultException {
+        // Unfortunately XMLList is package protected, making things a bit more complicated
+        if (res.getClass().getName().endsWith("XMLList")) {
+            try {
+                // An XMLList can wrap a simple string, we need to check that
+                Method m = res.getClass().getDeclaredMethod("hasSimpleContent");
+                m.setAccessible(true);
+                Boolean simpleCnt = (Boolean) m.invoke(res, null);
+                if (!simpleCnt)
+                    throw new FaultException(new QName("e4xEvalFailure"), "Expression " + expr + " returns a node list.");
+            } catch (NoSuchMethodException e) {
+                e.printStackTrace(); // Nothing very pertinent to do
+            } catch (InvocationTargetException e) {
+                e.printStackTrace(); // Nothing very pertinent to do
+            } catch (IllegalAccessException e) {
+                e.printStackTrace(); // Nothing very pertinent to do
+            }
         }
     }
 
