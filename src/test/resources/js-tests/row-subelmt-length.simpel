@@ -1,0 +1,36 @@
+processConfig.address = "/row-subelmt-length"
+
+function getRow() {
+ return <row>
+  <field>Task</field>
+  <field>Review Item</field>
+  <field>Approve Draft</field>
+  <field>Update Employees</field>
+  <field>Request Meetings</field>
+  <field>Generate Leads</field>
+  <field>Finalize Collaterals</field>
+  <field>Brief Customers</field>
+  <field>Brief Media</field>
+  <field>Update Website</field>
+  <field>Blog on Intalio</field>
+  <field>Blog on IT|Redux</field>
+  <field>Update AdWords</field>
+  <field>Update Newsletter</field>
+  <field>Issue Press Release</field>
+  <field>Organize Public Call</field>
+  <field>Organize Webinar</field>
+  <field>Update Customers</field>
+  <field>Update Partners</field>
+  <field>Update Users</field>
+</row>;
+
+}
+
+process Hello {
+  receive(self) { |startReq|
+    row = getRow();
+    rowLength = row.field.length();
+
+    reply(rowLength);
+  }
+}
