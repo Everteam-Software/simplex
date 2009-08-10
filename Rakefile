@@ -15,6 +15,7 @@
 #    limitations under the License.
 #
 
+require 'rubygems'
 gem "buildr", "~>1.3"
 require "buildr"
 require "buildr/antlr"
