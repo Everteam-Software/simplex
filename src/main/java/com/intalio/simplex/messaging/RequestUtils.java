@@ -1,4 +1,4 @@
-package com.intalio.simplex.embed.messaging;
+package com.intalio.simplex.messaging;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;

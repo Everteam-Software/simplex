@@ -16,14 +16,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.intalio.simplex.embed;
+package com.intalio.simplex.lifecycle;
 
 import com.intalio.simplex.EmbeddedServer;
 import com.intalio.simplex.Options;
 import com.intalio.simplex.http.EngineWebResource;
 import com.intalio.simplex.http.AdminWebResource;
-import com.intalio.simplex.embed.messaging.BindingContextImpl;
-import com.intalio.simplex.embed.messaging.MessageExchangeContextImpl;
+import com.intalio.simplex.messaging.BindingContextImpl;
+import com.intalio.simplex.messaging.MessageExchangeContextImpl;
 import org.apache.log4j.Logger;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.engine.BpelServerImpl;

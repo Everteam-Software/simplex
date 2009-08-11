@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.intalio.simplex.embed.messaging;
+package com.intalio.simplex.messaging;
 
 import java.io.IOException;
 import java.io.OutputStream;

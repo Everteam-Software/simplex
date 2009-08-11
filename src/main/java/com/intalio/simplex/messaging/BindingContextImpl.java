@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.intalio.simplex.embed.messaging;
+package com.intalio.simplex.messaging;
 
 import com.intalio.simplex.Options;
 import org.apache.ode.il.epr.URLEndpoint;

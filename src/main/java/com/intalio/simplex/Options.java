@@ -17,7 +17,7 @@
  */
 package com.intalio.simplex;
 
-import com.intalio.simplex.embed.MessageSender;
+import com.intalio.simplex.lifecycle.MessageSender;
 import org.apache.ode.bpel.iapi.BpelEventListener;
 import org.apache.ode.il.config.OdeConfigProperties;
 

@@ -14,7 +14,7 @@ function assert(msg, cond) {
 */
 
 var jz = Packages.com.sun.jersey.api.client;
-var reqUtils = Packages.com.intalio.simplex.embed.messaging.RequestUtils;
+var reqUtils = Packages.com.intalio.simplex.messaging.RequestUtils;
 var fejoml = Packages.com.intalio.simplex.http.datam.FEJOML;
 
 /* Builds an HTTP request calling the provided url and method using the payload. Both method and payload are

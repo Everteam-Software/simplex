@@ -15,20 +15,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.intalio.simplex.embed;
+package com.intalio.simplex.lifecycle;
 
 import com.intalio.simpel.CompilationException;
 import com.intalio.simpel.Descriptor;
 import com.intalio.simpel.SimPELCompiler;
 import org.apache.ode.bpel.iapi.*;
-import org.apache.ode.bpel.rapi.ProcessModel;
 import org.apache.ode.bpel.rtrep.v2.OProcess;
 import org.w3c.dom.Node;
 
 import javax.xml.namespace.QName;
 import java.io.File;
 import java.util.*;
-import java.net.URI;
 
 /**
  * TODO In the ProcessStore and the ProcessConf interfaces, some methods are part of the contract

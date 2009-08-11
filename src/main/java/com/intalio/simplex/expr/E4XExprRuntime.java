@@ -30,6 +30,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 /**
+ * E4X expressions evaluations, used by ODE to delegate the evaluation of all 
  * @author Matthieu Riou <mriou@apache.org>
  */
 public class E4XExprRuntime implements ExpressionLanguageRuntime {
@@ -48,7 +49,6 @@ public class E4XExprRuntime implements ExpressionLanguageRuntime {
         Scriptable parentScope = getScope(cx, oexpr, evaluationContext);
         ODEDelegator scope = new ODEDelegator(parentScope, evaluationContext, (SimPELExpr)oexpr, cx);
 
-        // First evaluating the assignment
         SimPELExpr expr = (SimPELExpr) oexpr;
         Object res = e4xEval(cx, scope, expr.getExpr());
         if (res instanceof String) return (String) res;
@@ -62,7 +62,6 @@ public class E4XExprRuntime implements ExpressionLanguageRuntime {
         Scriptable parentScope = getScope(cx, oexpr, evaluationContext);
         ODEDelegator scope = new ODEDelegator(parentScope, evaluationContext, (SimPELExpr)oexpr, cx);
 
-        // First evaluating the assignment
         SimPELExpr expr = (SimPELExpr) oexpr;
         Object res = e4xEval(cx, scope, expr.getExpr());
         if (res instanceof Boolean) return (Boolean)res;
@@ -93,7 +92,10 @@ public class E4XExprRuntime implements ExpressionLanguageRuntime {
         Scriptable parentScope = getScope(cx, oexpr, evaluationContext);
         ODEDelegator scope = new ODEDelegator(parentScope, evaluationContext, (SimPELExpr)oexpr, cx);
 
-        // First evaluating the assignment
+        // First evaluating the assignment. We evaluate the whole expression, not just the rvalue, as
+        // in E4X you can have things like:
+        //   foo.bar.baz = 2;
+        // In that case, the JS engine takes care of building the lvalue which is more convenient for us.
         SimPELExpr expr = (SimPELExpr) oexpr;
         String forged = expr.getExpr();
         if (expr.getLValue() != null)
@@ -115,11 +117,12 @@ public class E4XExprRuntime implements ExpressionLanguageRuntime {
             if (res instanceof Boolean) varType.underlyingType = OVarType.BOOLEAN_TYPE;
         }
 
-        // Produces an error if the result is a node list
+        // Produce an error if the result is a node list
         checkNodeList(res, expr.getExpr());
 
         ArrayList<Node> resList = new ArrayList<Node>(1);
         if (res instanceof String || res instanceof Number || res instanceof Boolean) {
+            // Simple type
             Document doc = DOMUtils.newDocument();
             resList.add(doc.createTextNode(res.toString()));
         } else if (res instanceof XMLObject) {
@@ -132,9 +135,10 @@ public class E4XExprRuntime implements ExpressionLanguageRuntime {
                 if (resNode.getNodeType() == Node.ELEMENT_NODE) mergeHeaders((Element) resNode);
                 resList.add(wrapper);
             } catch (IllegalArgumentException e) {
-                // Rhino makes it pretty hard to use its XML impl, XML and XMLList are package level
-                // classes so I can't test on them but toDomNode doesn't accept XMLList
-                // We get in here if the node list is a simple type, usually a string
+                // Rhino makes it pretty hard to use its XML impl, XML and XMLList are package protected
+                // classes so I can't test on them easily but toDomNode doesn't accept an XMLList.
+                // We get in here if the node list is a simple type, usually a string, obtained as the
+                // result of an XML expression.
                 Document doc = DOMUtils.newDocument();
                 resList.add(doc.createTextNode(res.toString()));
             }
@@ -143,7 +147,7 @@ public class E4XExprRuntime implements ExpressionLanguageRuntime {
     }
 
     public Calendar evaluateAsDate(OExpression oExpression, EvaluationContext evaluationContext) throws FaultException {
-        return null;
+        throw new UnsupportedOperationException("Not implemented yet");
     }
 
     public Duration evaluateAsDuration(OExpression oExpression, EvaluationContext evaluationContext) throws FaultException {
@@ -190,6 +194,11 @@ public class E4XExprRuntime implements ExpressionLanguageRuntime {
         }
     }
 
+    /**
+     * Implements the whole logic needed to have the Javascript engine delegate back to ODE to get a variable
+     * value it doesn't know about (which is for most of them since ODE as used as the persistent variable
+     * values storage).
+     */
     private class ODEDelegator extends Delegator  {
         private EvaluationContext _evaluationContext;
         private SimPELExpr _expr;
@@ -208,9 +217,11 @@ public class E4XExprRuntime implements ExpressionLanguageRuntime {
 
         public Object get(String name, Scriptable start) {
             try {
+                // Has this variable been identified during compilation? If not, let Rhino handle it.
                 OScope.Variable v = _expr.getReferencedVariable(name);
                 if (v == null || forceDelegate) return super.get(name, start);
 
+                // Do we already have this variable value in memory?
                 if (_env.get(name) != null) return _env.get(name);
 
                 Node node;
@@ -225,7 +236,6 @@ public class E4XExprRuntime implements ExpressionLanguageRuntime {
                     else throw e;
                 }
                 // Simple types
-                // TODO I think the sumple type case never exists anymore (stuff get wrapped), remove this
                 if (node.getNodeValue() != null) {
                     String rawValue = node.getNodeValue();
                     if (v.type.underlyingType == OVarType.SCHEMA_TYPE || v.type.underlyingType == OVarType.STRING_TYPE)
@@ -233,14 +243,14 @@ public class E4XExprRuntime implements ExpressionLanguageRuntime {
                     if (v.type.underlyingType == OVarType.NUMBER_TYPE) return Double.valueOf(rawValue);
                     if (v.type.underlyingType == OVarType.BOOLEAN_TYPE) return Boolean.valueOf(rawValue);
                 } else if (node.getNodeType() == Node.ELEMENT_NODE) {
+                    // Elements
                     Element nodeElmt = (Element) node;
                     if (DOMUtils.getFirstChildElement(nodeElmt) == null) {
                         String rawValue = nodeElmt.getTextContent();
                         if (v.type.underlyingType == OVarType.NUMBER_TYPE) return Double.valueOf(rawValue);
                         if (v.type.underlyingType == OVarType.BOOLEAN_TYPE) return Boolean.valueOf(rawValue);
                         return rawValue;
-                    }
-                    else {
+                    } else {
                         Element child = DOMUtils.getFirstChildElement((Element)node);
                         if (!child.getNodeName().equals("headers")) node = child;
                     }

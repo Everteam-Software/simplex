@@ -20,8 +20,8 @@ package com.intalio.simplex.lifecycle;
 
 import com.intalio.simpel.CompilationException;
 import com.intalio.simpel.Descriptor;
-import com.intalio.simplex.embed.EmbeddedStore;
-import com.intalio.simplex.embed.EmbeddedProcessConf;
+import com.intalio.simplex.lifecycle.EmbeddedStore;
+import com.intalio.simplex.lifecycle.EmbeddedProcessConf;
 import org.apache.log4j.Logger;
 import org.apache.ode.bpel.iapi.ProcessStoreEvent;
 import org.apache.ode.bpel.rapi.ProcessModel;

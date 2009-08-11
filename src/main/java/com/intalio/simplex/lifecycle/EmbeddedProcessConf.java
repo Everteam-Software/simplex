@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.intalio.simplex.embed;
+package com.intalio.simplex.lifecycle;
 
 import com.intalio.simpel.Descriptor;
 import org.apache.ode.bpel.evt.BpelEvent;

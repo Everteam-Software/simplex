@@ -19,7 +19,7 @@
 package com.intalio.simpel;
 
 import com.intalio.simplex.EmbeddedServer;
-import com.intalio.simplex.embed.MessageSender;
+import com.intalio.simplex.lifecycle.MessageSender;
 import junit.framework.TestCase;
 import org.apache.ode.utils.DOMUtils;
 import org.w3c.dom.Document;

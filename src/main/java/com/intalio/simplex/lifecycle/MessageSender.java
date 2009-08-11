@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.intalio.simplex.embed;
+package com.intalio.simplex.lifecycle;
 
 import org.w3c.dom.Node;
 
