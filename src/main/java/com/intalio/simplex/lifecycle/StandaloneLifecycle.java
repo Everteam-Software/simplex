@@ -19,17 +19,8 @@
 package com.intalio.simplex.lifecycle;
 
 import com.intalio.simplex.Options;
-import com.intalio.simplex.embed.EmbeddedLifecycle;
-import com.sun.jersey.spi.container.servlet.ServletContainer;
+import com.intalio.simplex.lifecycle.EmbeddedLifecycle;
 import org.apache.log4j.Logger;
-import org.mortbay.jetty.Server;
-import org.mortbay.jetty.webapp.WebAppContext;
-import org.mortbay.jetty.servlet.ServletHolder;
-import org.mortbay.jetty.servlet.ServletHandler;
-import org.mortbay.jetty.servlet.SessionHandler;
-import org.mortbay.jetty.handler.ContextHandler;
-import org.mortbay.jetty.handler.HandlerList;
-import org.mortbay.jetty.handler.ResourceHandler;
 
 import java.io.*;
 import java.util.zip.ZipEntry;

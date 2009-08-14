@@ -16,11 +16,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.intalio.simplex.embed.messaging;
+package com.intalio.simplex.messaging;
 
-import com.intalio.simplex.embed.MessageSender;
+import com.intalio.simplex.lifecycle.MessageSender;
 import com.intalio.simplex.http.datam.FEJOML;
-import static com.intalio.simplex.embed.messaging.RequestUtils.*;
+import static com.intalio.simplex.messaging.RequestUtils.*;
 
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
@@ -34,13 +34,11 @@ import org.apache.ode.utils.DOMUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 import javax.wsdl.Fault;
 import javax.wsdl.Operation;
 import javax.wsdl.Part;
 import javax.xml.namespace.QName;
-import java.io.UnsupportedEncodingException;
 import java.util.HashSet;
 import java.util.Set;
 

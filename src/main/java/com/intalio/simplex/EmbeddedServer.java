@@ -18,7 +18,7 @@
 package com.intalio.simplex;
 
 import com.intalio.simpel.Descriptor;
-import com.intalio.simplex.embed.EmbeddedLifecycle;
+import com.intalio.simplex.lifecycle.EmbeddedLifecycle;
 import org.apache.log4j.Logger;
 import org.apache.ode.bpel.iapi.InvocationStyle;
 import org.apache.ode.bpel.iapi.Message;

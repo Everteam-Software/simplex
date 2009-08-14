@@ -1,6 +1,6 @@
 package com.intalio.simplex.lifecycle;
 
-import com.intalio.simplex.embed.EmbeddedLifecycle;
+import com.intalio.simplex.lifecycle.EmbeddedLifecycle;
 import com.intalio.simplex.Options;
 
 import javax.servlet.ServletContext;

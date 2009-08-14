@@ -18,7 +18,7 @@
 
 package com.intalio.simplex.http;
 
-import com.intalio.simplex.embed.EmbeddedLifecycle;
+import com.intalio.simplex.lifecycle.EmbeddedLifecycle;
 import com.intalio.simplex.http.datam.FEJOML;
 import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.RESTInMessageExchange;
@@ -34,6 +34,9 @@ import javax.ws.rs.core.Response;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Process-specific web resource, mostly handles message creation and interfacing with the client API.
+ */
 public class ProcessWebResource {
 
     private EngineWebResource.ResourceDesc _resource;

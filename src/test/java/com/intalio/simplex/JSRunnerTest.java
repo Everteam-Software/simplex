@@ -4,7 +4,7 @@ import junit.framework.TestCase;
 import com.intalio.simpel.util.JSTopLevel;
 import com.intalio.simplex.lifecycle.ScriptBasedStore;
 import com.intalio.simplex.lifecycle.WebServer;
-import com.intalio.simplex.embed.EmbeddedLifecycle;
+import com.intalio.simplex.lifecycle.EmbeddedLifecycle;
 import org.mozilla.javascript.*;
 import org.mozilla.javascript.tools.ToolErrorReporter;
 

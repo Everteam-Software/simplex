@@ -33,10 +33,14 @@ import javax.ws.rs.core.UriInfo;
 import org.apache.ode.bpel.iapi.Resource;
 import org.apache.log4j.Logger;
 
-import com.intalio.simplex.embed.EmbeddedLifecycle;
+import com.intalio.simplex.lifecycle.EmbeddedLifecycle;
 import com.sun.jersey.api.NotFoundException;
 import com.sun.jersey.api.uri.UriTemplate;
 
+/**
+ * Main engine resource, caches the list of all process resources the engine knows about and route
+ * requests to the appropriate one.
+ */
 @Path("/")
 public class EngineWebResource {
 
@@ -58,6 +62,10 @@ public class EngineWebResource {
         }
     }
 
+    /**
+     * Finds the appropriate resource from the map by matching the requested URL against the URI templates of
+     * all kown process resources.
+     */
     private Object[] findResource(String url) {
         String surl = stripSlashes(url);
         for (Map.Entry<UriTemplate, ResourceDesc> resourceDesc : _engineResources.entrySet()) {
@@ -73,12 +81,20 @@ public class EngineWebResource {
         return null;
     }
 
+    /**
+     * Strips starting and trailing slashes.
+     */
     private static String stripSlashes(String sl) {
         int start = sl.charAt(0) == '/' ? 1 : 0;
         int end = sl.charAt(sl.length()-1) == '/' ? sl.length() - 1 : sl.length();
         return sl.substring(start, end);
     }
 
+    /**
+     * Called by the engine to register a knew resource. Needs to be static as EngineWebResource is instantied
+     * by Jersey and there's no way (at least now) to get the reference and provide it to the engine.
+     * @param resource
+     */
     public static void registerResource(Resource resource) {
         if (__log.isDebugEnabled())
             __log.debug("Registering resource " + resource.getUrl() + " / " + resource.getMethod());
