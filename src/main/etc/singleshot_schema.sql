@@ -49,27 +49,30 @@ CREATE TABLE `notifications` (
 ) ENGINE=InnoDB;
 
 INSERT INTO `notifications` VALUES (1,'Nesciunt laudantium quam molestiae assumenda consequatur voluptatem aut autem.','Sed placeat unde odio et ipsum voluptatum quia officiis. Doloribus ab atque dolorum quia et iusto aliquam. Eos consectetur repellendus harum tempora sed. Quis sunt molestias qui quo. Sunt facere exercitationem id voluptatem.\n\nAnimi explicabo tempore assumenda sit sint id voluptas non. Voluptatem labore commodi sed tempore non unde totam molestiae. Ut aut sed molestiae tempora. Quidem sunt velit reprehenderit deleniti eveniet qui aut. Et alias tenetur veniam cupiditate tempora occaecati suscipit blanditiis.\n\nAd sunt quidem placeat vel est. Accusamus atque debitis repellat aut neque veritatis voluptatem. Esse error optio odio.\n\nQui sit quia libero. Nostrum ut omnis beatae et expedita ipsam quo. Architecto illo voluptas nostrum consequuntur corporis ipsam veritatis et. Officiis tenetur ducimus doloremque.\n\nLaboriosam est nulla possimus in ut maxime quidem eius. Recusandae iste sit ut ut repellendus molestiae. Mollitia cum vero saepe. Sed consectetur corrupti id. Autem eaque quos cupiditate veniam beatae dolor rerum.',NULL,NULL,NULL,2,'2009-05-27 21:50:49','2009-05-27 21:50:49'),(2,'Commodi architecto velit quod assumenda ducimus rerum est numquam.','Iusto modi sapiente culpa aut quibusdam. Aut sit repudiandae vero perferendis cum inventore ea. Minima et rerum sit ipsum et. Ea et non qui occaecati quia possimus aut.\n\nBeatae dolores eaque illum ut illo et quos. Dicta perspiciatis eos consequatur facere libero accusantium. Aliquam veritatis fuga sunt sit. Commodi qui sed repellendus.\n\nVoluptate libero voluptas aut sed voluptatibus aspernatur. Beatae assumenda at ea esse dolorem qui aliquid. Accusantium sed repellendus voluptates corrupti et dolor aut. Odio facere possimus id ex beatae molestias quia dolor. Aut et eum aut molestias voluptatem reprehenderit excepturi soluta.\n\nSapiente magnam reiciendis iusto earum. Velit consequatur dolor omnis blanditiis eius ea eum. Aut facere explicabo pariatur voluptatem suscipit nostrum ad. Saepe et fugit perferendis optio qui eum et. Alias molestiae eum temporibus quis.\n\nIste aut facere eveniet aut quaerat cupiditate. Omnis repellendus soluta iusto quia nisi. Sint aliquam non consectetur.',NULL,NULL,NULL,2,'2009-05-27 21:50:49','2009-05-27 21:50:49'),(3,'Porro quidem aliquam enim esse et.','Nostrum quasi vel architecto. Placeat mollitia earum omnis aut enim est ut. Non ipsum ullam sit id fugiat voluptates et. Rerum omnis fugiat omnis commodi rem nihil fuga repudiandae. Rerum dolorem ea odit est dolor rem provident.\n\nEligendi commodi eum itaque quod voluptates aliquid non. Deleniti inventore nemo perspiciatis nostrum. Numquam quis est nulla voluptatem quo quaerat hic asperiores.\n\nVitae voluptatem repudiandae tempora temporibus accusantium velit. Ipsum temporibus ut aspernatur est occaecati similique. Culpa ea quibusdam explicabo architecto in. Non reprehenderit corrupti necessitatibus. Animi sunt distinctio et voluptatibus facere praesentium earum sint.\n\nConsequatur expedita aliquid est tempora quos qui. Rerum tenetur voluptas at. Vitae et eum maxime voluptas.\n\nEligendi et pariatur perferendis error sit atque quia deserunt. Voluptatem qui illum cumque quia reprehenderit aperiam laboriosam. Consectetur quaerat ut quo voluptatem et velit expedita repellendus. Fugiat porro qui ullam. Et quasi aliquid consequuntur suscipit ducimus aut.',NULL,NULL,4,2,'2009-05-27 21:50:50','2009-05-27 21:50:50'),(4,'Odit eum delectus vero quaerat praesentium.','Aperiam sunt unde quis ut velit maiores. Qui placeat velit assumenda. Iusto aut mollitia accusantium accusamus quis. Sunt ipsa architecto corporis aliquam explicabo nulla tenetur.\n\nOmnis et aspernatur aliquam. In ut doloribus velit laudantium explicabo neque. Rem eveniet quod omnis illum et libero quis voluptate. Totam tenetur sed tempora non ducimus voluptatibus.\n\nAccusantium quidem et pariatur dicta. Repellendus qui deleniti est dignissimos consequuntur. Qui neque est amet est ullam deserunt aut.\n\nConsequatur cumque corrupti enim voluptatibus dolorum quasi sunt assumenda. Voluptatem est necessitatibus a vel dolore quod soluta sunt. Enim blanditiis maiores facilis incidunt delectus. Mollitia et harum laborum. Omnis aut nostrum nihil quidem expedita.\n\nCorrupti repellat ex quisquam omnis. Rerum dignissimos voluptatibus accusantium dolor. Consequuntur dolor illo adipisci voluptas delectus maxime. Est dolorem soluta aliquam ea expedita accusantium et qui.',NULL,NULL,NULL,2,'2009-05-27 21:50:51','2009-05-27 21:50:51'),(5,'Veritatis illum laboriosam deleniti explicabo facilis.','Rerum et dolores illum ea ut. Et sed dolorem et autem cupiditate enim ut. Quidem est voluptatem ut quisquam quod ipsa. Et ratione sint non eum ad dolorum.\n\nIpsam dolores reprehenderit id fugiat. Quasi a consectetur et dicta ratione cumque minus. Ducimus illo quos maxime voluptatibus amet. Deserunt rem ut quo minima voluptatem dolor optio id. Repellendus et recusandae ratione reiciendis laborum officiis nisi.\n\nIusto unde a reiciendis saepe quis nihil corrupti. Sint repellat rerum est incidunt. Animi fugiat omnis possimus. Dolore alias accusantium omnis nam consectetur itaque eos.\n\nAt magnam dolor qui laudantium voluptas. Voluptas velit sed commodi nobis eligendi. Earum rerum aut rerum. Enim sit maxime qui officiis a. Et voluptate facilis aliquam voluptatem qui quia omnis.\n\nFugiat est a iusto omnis aut. Et aut repudiandae distinctio voluptates doloribus vitae. Perspiciatis quia maiores nam aperiam quia enim. Consectetur commodi excepturi quidem sint similique nobis fuga harum. Consequatur dignissimos quo quod.',NULL,NULL,NULL,2,'2009-05-27 21:50:51','2009-05-27 21:50:51');
-
 DROP TABLE IF EXISTS `people`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
 CREATE TABLE `people` (
-  `id` int(11) NOT NULL auto_increment,
-  `identity` varchar(255) NOT NULL,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `fullname` varchar(255) NOT NULL,
   `email` varchar(255) NOT NULL,
-  `locale` varchar(5) default NULL,
-  `timezone` int(11) default NULL,
-  `password` varchar(64) default NULL,
-  `access_key` varchar(32) NOT NULL,
-  `created_at` datetime default NULL,
-  `updated_at` datetime default NULL,
-  PRIMARY KEY  (`id`),
-  UNIQUE KEY `index_people_on_identity` (`identity`),
-  UNIQUE KEY `index_people_on_access_key` (`access_key`),
+  `locale` varchar(5) DEFAULT NULL,
+  `timezone` int(11) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `login` varchar(255) NOT NULL,
+  `crypted_password` varchar(255) NOT NULL,
+  `password_salt` varchar(255) NOT NULL,
+  `persistence_token` varchar(255) NOT NULL,
+  `single_access_token` varchar(255) NOT NULL,
+  `perishable_token` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
   UNIQUE KEY `index_people_on_email` (`email`),
   KEY `index_people_on_fullname` (`fullname`)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+SET character_set_client = @saved_cs_client;
 
-INSERT INTO `people` VALUES (1,'singleshot','Singleshot','singleshot@example.com',NULL,NULL,'2460302dab::97bf1c6c72939f149f0acaa6a6307ad0faf8ef46','724de262848155b4e0858b1c734a3973','2009-05-27 21:50:48','2009-05-27 21:50:48'),(2,'bond','Mr.Bond','bond@example.com',NULL,NULL,'2460302dab::97bf1c6c72939f149f0acaa6a6307ad0faf8ef46','f9b06fd095422aa9c7c95ae85a9ef77e','2009-05-27 21:50:48','2009-05-27 21:50:48');
+INSERT INTO `people` VALUES (1,'Singleshot','singleshot@example.com', NULL, NULL, '2009-08-14 22:04:16', '2009-08-14 22:04:16', 'singleshot', '1ae325c4c42ba9744bd0ec2b32be594b77d6f734519d9eafb5b29dcd0cd6ef3a3045b13b8c31bd6680e2d877d687c7d008f0aa6ade4f4408c62e490a77f36ab8', 'PSUyUJi1kC4sxV38k7yb', '94b01c2f76cbbf11b4250942a602e67bfd0468b5163b7fd5da3284d16275bb8c48df155ae88b5cdae81f55f50f3797ba92de5561dd5c48fd159d317777193ea4', 'UW-xwf7ceAgYVK6fIc61', '08pXv9qj5h4ow4GRi4Ip'), (2, 'Mr.Bond', 'bond@example.com', NULL, NULL, '2009-08-14 22:04:16', '2009-08-14 22:24:04', 'bond', '42fe37c4f57eb1d2c6d26ecda9f4d426727cbabb014727b970bf901bf50950efd0a269c269f888e12820546e7347ab9555ba7e159a66c249f35529b05f82806a', 'ydEd1j5W_t4Sh2RuVV5W', '17d4f60c59aa91d2a03e5f1f87f99c6f331571fd9db8a285a73243c7f7ed26ff7a039a75e2bae54eb0872919e44b641c9a6f2b4b257468c9fc368fb19039f729', '5_0nq3VsMMjRfm_T5OPx', '8JCnr2ZWzCxD0FOUX1fZ');
 
 DROP TABLE IF EXISTS `schema_migrations`;
 CREATE TABLE `schema_migrations` (
