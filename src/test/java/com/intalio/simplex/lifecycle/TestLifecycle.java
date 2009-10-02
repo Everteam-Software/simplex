@@ -57,7 +57,6 @@ public class TestLifecycle extends TestCase {
 
     public void testFSDeployUndeploy() throws Exception {
         writeProcessFile("helloworld.simpel", HELLO_WORLD);
-        Thread.sleep(3000);
         
         ClientConfig cc = new DefaultClientConfig();
         Client c = Client.create(cc);
@@ -99,7 +98,6 @@ public class TestLifecycle extends TestCase {
         writeProcessFile("foo.js", "var foo = 2;\n");
         writeProcessFile("load-js.simpel", "load('foo.js');\n" + HELLO_WORLD);
 
-        Thread.sleep(2000);
         File cbp = new File(rootDir, "work/load-js-1.cbp");
         assertTrue(cbp.exists());
         assertTrue(cbp.length() > 0);
@@ -116,7 +114,7 @@ public class TestLifecycle extends TestCase {
         FileOutputStream fos = new FileOutputStream(pfile);
         fos.write(content.getBytes());
         fos.close();
-        Thread.sleep(1000);
+        Thread.sleep(5000);
     }
 
 }
